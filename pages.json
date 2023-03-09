@@ -1,17 +1,115 @@
 {
-	"pages": [{
-		"path": "pages/index/index",
-		"style": {
-			"navigationBarTitleText": "uni-app"
-		}
-	}],
 	"globalStyle": {
-		"navigationBarTextStyle": "black",
-		"navigationBarTitleText": "uni-app",
-		"navigationBarBackgroundColor": "#F8F8F8",
 		"backgroundColor": "#F8F8F8",
 		"app-plus": {
 			"background": "#efeff4"
 		}
+	},
+	"pages": [{
+			"path": "pages/personal/personal",
+			"style": {
+				"enablePullDownRefresh": true,
+				"onReachBottomDistance": 10,
+				"navigationStyle": "custom",
+				"app-plus": {
+					"pullToRefresh": {
+						"offset": "90px"
+					}
+				},
+				"h5": {
+					"pullToRefresh": {
+						"offset": "50px"
+					}
+				}
+			}
+		},
+		{
+			"path": "pages/share/share",
+			"style": {
+				"enablePullDownRefresh": true,
+				"onReachBottomDistance": 10,
+				"navigationStyle": "custom",
+				"app-plus": {
+					"pullToRefresh": {
+						"offset": "90px"
+					}
+				},
+				"h5": {
+					"pullToRefresh": {
+						"offset": "50px"
+					}
+				}
+			}
+		},
+		{
+			"path": "pages/transfer/transfer",
+			"style": {
+				"enablePullDownRefresh": false,
+				"onReachBottomDistance": 10,
+				"navigationStyle": "custom",
+				"app-plus": {
+					"pullToRefresh": {
+						"offset": "90px"
+					}
+				},
+				"h5": {
+					"pullToRefresh": {
+						"offset": "50px"
+					}
+				}
+			}
+		},
+		{
+			"path": "pages/profile/profile",
+			"style": {
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/login/login",
+			"style": {
+				"app-plus": {
+					"titleNView": {
+						"backgroundColor": "#44474d",
+						"titleText": "登录",
+						"autoBackButton": false
+					}
+				}
+			}
+		},
+		{
+			"path": "pages/error/error",
+			"style": {
+				"app-plus": {
+					"titleNView": {
+						"backgroundColor": "#44474d",
+						"titleText": "项目启动异常",
+						"autoBackButton": false
+					}
+				}
+			}
+		}
+	],
+	"tabBar": {
+		"color": "#7f8389",
+		"selectedColor": "#E4393C",
+		"borderStyle": "#7f8389",
+		"backgroundColor": "#fafafa",
+		"list": [{
+			"pagePath": "pages/personal/personal",
+			"text": "个人文件"
+		}, {
+			"pagePath": "pages/share/share",
+			"text": "共享文件"
+		}, {
+			"pagePath": "pages/transfer/transfer",
+			"text": "传输列表"
+		}, {
+			"pagePath": "pages/profile/profile",
+			"text": "个人中心"
+		}]
+	},
+	"easycom": {
+		"autoscan": true
 	}
 }

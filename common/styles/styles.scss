@@ -1,0 +1,9 @@
+$cloud-theme-color: #E4393C;
+
+.clear-float::after {
+ 	content: "";
+ 	display: block;
+ 	height: 0;
+ 	clear: both;
+ 	visibility: hidden;
+ }
