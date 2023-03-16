@@ -1,5 +1,6 @@
 <template>
-	<view v-if="showPopup||onceRender" v-show="showPopup"  class="uni-popup" :class="[popupstyle, isDesktop ? 'fixforpc-z-index' : '']">
+	<view v-if="showPopup||onceRender" v-show="showPopup" class="uni-popup"
+		:class="[popupstyle, isDesktop ? 'fixforpc-z-index' : '']">
 		<view @touchstart="touchstart">
 			<uni-transition key="1" v-if="maskShow" name="mask" mode-class="fade" :styles="maskClass"
 				:duration="duration" :show="showTrans" @click="onTap" />
@@ -87,9 +88,9 @@
 				default: 'rgba(0, 0, 0, 0.4)'
 			},
 			// 指定使用v-show指令，不重新渲染Pop组件
-			onceRender:{
-				type:Boolean,
-				default:false
+			onceRender: {
+				type: Boolean,
+				default: false
 			},
 		},
 

@@ -12,7 +12,8 @@ App.mpType = 'app'
 Vue.use(router)
 Vue.use(utils)
 
-Vue.prototype.$store = store.instance
+// Vue.prototype.$store = store.instance
+uni.$myStore = store.instance
 
 const app = new Vue({
 	store: store.instance,

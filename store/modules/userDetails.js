@@ -24,7 +24,6 @@ const userDetail = {
 	getters: {
 		details: state => state.details
 	},
-
 	/**
 	 * 用来更改state
 	 */

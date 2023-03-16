@@ -16,7 +16,9 @@
 				window.document.title = this.sysConfig.brandName
 				// #endif
 				this.$store.dispatch('userGetInfo').then(() => {
-
+					this.$store.commit('SET_isSignedIn', true)
+				}).catch(() => {
+					this.$store.commit('SET_isSignedIn', false)
 				})
 			}).catch((error) => {
 				uni.$myRoute.router({

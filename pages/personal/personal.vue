@@ -1,16 +1,54 @@
 <template>
 	<view>
-		<file-page :page-type='pageType'></file-page>
+		<file-page ref="filePage" :page-type='pageType'></file-page>
 	</view>
 </template>
 
 <script>
+	import {
+		mapGetters
+	} from 'vuex'
+
 	export default {
 		data() {
 			return {
 				pageType: 'personal'
 			}
 		},
+		computed: {
+			// 因为是首页 所以需要判断是否为登录状态
+			...mapGetters([
+				'isSignedIn'
+			])
+		},
+		watch: {
+			isSignedIn: {
+				handler(newValue) {
+					if (newValue) {
+						this.$nextTick(() => {
+							// 登录状态下 再初始化应用数据
+							this.$store.dispatch('getTenantInfo')
+							this.$store.dispatch('getPermissionBtns')
+							this.$store.dispatch('getCanBeUploadType')
+							this.$refs.filePage.refreshList()
+						})
+					}
+				},
+				immediate: true
+			}
+		},
+		onLoad(option) {
+			console.log('personal onLoad', option.fromLogin)
+		},
+		onShow() {
+			if (this.isSignedIn) {
+				this.$nextTick(() => {
+					this.$refs.filePage.refreshList()
+				})
+			}
+		},
+		onReady() {},
+		onUnload() {},
 		onTabItemTap(args) {
 			console.log('onTabItemTap', args)
 		},
@@ -26,12 +64,13 @@
 			}
 		},
 		onPullDownRefresh(args) {
-			setTimeout(function() {
-				uni.stopPullDownRefresh()
-			}, 3000)
+			uni.$emit('refreshList')
 		},
 		onReachBottom(args) {
 			uni.$emit('loadMore')
+		},
+		methods: {
+
 		}
 	}
 </script>

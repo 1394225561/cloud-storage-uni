@@ -19,6 +19,7 @@ export const request = function({
 		data: params,
 		method: api.method.toUpperCase() || 'GET',
 		dataType: 'json',
+		responseType: api.responseType,
 		// contentType: 'json',
 		header: {
 			'X-Requested-With': 'XMLHttpRequest', // 标记ajax的异步请求
@@ -30,8 +31,9 @@ export const request = function({
 		withCredentials: true
 	}
 
+	// app端设置请求头cookie
 	// #ifdef APP-PLUS
-	console.log('uni.$myUtils.loginPersistence.cookieValue', uni.$myUtils.loginPersistence.cookieValue)
+	// console.log('uni.$myUtils.loginPersistence.cookieValue', uni.$myUtils.loginPersistence.cookieValue)
 	options.header['Cookie'] = uni.$myUtils.loginPersistence.cookieValue
 	// #endif
 
@@ -96,8 +98,10 @@ export const request = function({
 				// 第二项为返回数据
 				let [err, res] = data
 				if (err) {
+					handleResult(err)
 					reject(err)
 				} else {
+					handleResult(res)
 					let errorCode = [400, 401, 500]
 					if (errorCode.indexOf(res.statusCode) !== -1) {
 						handleStatusCode(res)
@@ -111,12 +115,21 @@ export const request = function({
 	}
 }
 
+function handleResult(data) {
+	// app端 保存cookie
+	// #ifdef APP-PLUS
+	if (data.cookies.length) {
+		uni.$myUtils.loginPersistence.setCookie(data.cookies[0])
+	}
+	// #endif
+}
+
 function handleStatusCode(error) {
-	console.log('handleStatusCode', error)
+	// console.log('handleStatusCode', error)
 	let statusCode = error.statusCode
 	let resData = error.data
-	console.log('statusCode', statusCode)
-	console.log('resData', resData)
+	// console.log('statusCode', statusCode)
+	// console.log('resData', resData)
 	switch (statusCode) {
 		case 400:
 			if (resData.errorCode && resData.errorCode === '400sec-core-301') {

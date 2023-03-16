@@ -1,10 +1,11 @@
 import {
-	sysConfig
+	sysConfig,
+	getPermissionBtn
 } from '@/common/apis/appConfig/appConfig.js'
-// import {
-// 	getTenantInfo,
-// 	dictGroupGet
-// } from '@/api/tenantApi/tenantApi.js'
+import {
+	getTenantInfo,
+	dictGroupGet
+} from '@/common/apis/tenantApi/tenantApi.js'
 
 // const EMPTY_OBJECT_STRING = '{}'
 
@@ -18,7 +19,8 @@ const app = {
 		permissionBtns: [],
 		tenantInfo: {},
 		dictGroup: {},
-		dictSwitchGroup: {}
+		dictSwitchGroup: {},
+		isSignedIn: false
 	},
 	getters: {
 		/**
@@ -32,6 +34,9 @@ const app = {
 		tenantConfig(state) {
 			return state.tenantConfig
 		},
+		permissionBtns(state) {
+			return stata.permissionBtns
+		},
 		tenantInfo(state) {
 			return state.tenantInfo
 		},
@@ -40,6 +45,9 @@ const app = {
 		},
 		dictSwitchGroup(state) {
 			return state.dictSwitchGroup
+		},
+		isSignedIn(state) {
+			return state.isSignedIn
 		}
 	},
 	mutations: {
@@ -51,9 +59,8 @@ const app = {
 		},
 		// 获取当前用户权限按钮信息列表
 		SET_PERMISSION_BTN(state, payload) {
-			window.$storage.set({
-				permissionBtns: payload.join(routerSplitCharacter)
-			})
+			state.permissionBtns = payload
+			uni.setStorageSync('permissionBtns', payload.join(uni.$myUtils.config.splitCharacter))
 		},
 		SET_TENANTINFO(state, payload) {
 			state.tenantInfo = payload
@@ -63,6 +70,9 @@ const app = {
 		},
 		SET_DICTSWITCHGROUP(state, payload) {
 			state.dictSwitchGroup = payload
+		},
+		SET_isSignedIn(state, payload) {
+			state.isSignedIn = payload
 		}
 	},
 	actions: {
@@ -75,7 +85,7 @@ const app = {
 					needLoading: false
 				}).then(res => {
 					commit('SET_SYSCONFIG', res.data)
-					resolve()
+					resolve(res.data)
 				}).catch(error => {
 					reject(error)
 				})
@@ -87,7 +97,7 @@ const app = {
 			return new Promise((resolve, reject) => {
 				uni.$myUtils.request(tenantConfig).then(res => {
 					commit('SET_TENANTCONFIG', res.data)
-					resolve()
+					resolve(res.data)
 				}).catch(error => {
 					reject(error)
 				})
@@ -97,7 +107,9 @@ const app = {
 			commit
 		}, payload) {
 			return new Promise((resolve, reject) => {
-				uni.$myUtils.request(getPermissionBtn).then(res => {
+				uni.$myUtils.request({
+					api: getPermissionBtn
+				}).then(res => {
 					let array = []
 					res.data.forEach(item => {
 						array.push(item.code)
@@ -113,9 +125,11 @@ const app = {
 			commit
 		}, payload = []) {
 			return new Promise((resolve, reject) => {
-				uni.$myUtils.request(getTenantInfo).then(res => {
+				uni.$myUtils.request({
+					api: getTenantInfo
+				}).then(res => {
 					commit('SET_TENANTINFO', res.data)
-					resolve()
+					resolve(res.data)
 				}).catch(error => {
 					reject(error)
 				})

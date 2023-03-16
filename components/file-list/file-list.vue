@@ -3,7 +3,7 @@
 		<view class="bread-crumb">
 			面包屑
 		</view>
-		<uni-list-item v-for="(data, index) in listData" :key="data.id" in :title="data.id + ''"></uni-list-item>
+		<uni-list-item v-for="(data, index) in listData" :key="data.id" in :title="data.fileName + ''"></uni-list-item>
 	</uni-list>
 </template>
 
@@ -40,7 +40,7 @@
 		}
 
 		::v-deep .uni-list-item__content-title {
-			color: $cloud-theme-color;
+			// color: $cloud-theme-color;
 		}
 	}
 </style>

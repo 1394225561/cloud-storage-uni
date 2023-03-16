@@ -22,7 +22,7 @@ export {
 	default as UserDetails
 }
 from './userDetails'
-// export {
-// 	default as transferList
-// }
-// from './transferList'
+export {
+	default as transferList
+}
+from './transferList'

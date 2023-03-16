@@ -4,3 +4,8 @@ export const sysConfig = {
 	path: '/api/v2/defaultConfig/system/get',
 	method: 'get'
 }
+export const getPermissionBtn = {
+	app: 'cloudStorage',
+	path: '/api/menu/pagePermissions',
+	method: 'get'
+}

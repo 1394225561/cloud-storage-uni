@@ -26,10 +26,10 @@ const handleOverwirteRoute = () => {
 			const {
 				url: path
 			} = options
-			console.log('handleOverwirteRoute options', options)
-			if (!whiteList.includes(path)) {
+			if (!whiteList.includes(path.split("?")[0])) {
 				uni.$myRoute.router(loginPath)
 			} else {
+				console.log('handleOverwirteRoute options', options)
 				return original.call(this, options)
 			}
 		}

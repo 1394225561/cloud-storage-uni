@@ -41,12 +41,14 @@
 <script>
 	import {
 		generateBase64,
-		getTenantList
-	} from '@/common/apis/tenantApi.js/tenantApi.js'
+		getTenantList,
+		validatCheckCode,
+		login
+	} from '@/common/apis/tenantApi/tenantApi.js'
 	import {
 		mapGetters
 	} from 'vuex'
-
+	import utils from '@/utils/utils.js'
 
 	export default {
 		data() {
@@ -84,7 +86,8 @@
 						placeholder: '请输入验证码'
 					}
 				},
-				tenantList: []
+				tenantList: [],
+				isLoginProcess: false
 			}
 		},
 		computed: {
@@ -93,8 +96,10 @@
 			])
 		},
 		onLoad() {
+			this.$store.dispatch('getSysConfig')
 			this.getCaptcha()
 			this.getTenantList()
+			this.getLoginInfo()
 		},
 		methods: {
 			getCaptcha(cb) {
@@ -133,15 +138,11 @@
 			confirmTenant() {
 
 			},
-			saveLoginInfo() {
-				// 保存上次登录时选择的单位和账号
-				uni.setStorageSync('loginInfo', {
-					tenantCode: this.formData.tenant.tenantCode,
-					tenantName: this.formData.tenant.text,
-					account: this.formData.account.text
-				})
-			},
 			doLogin() {
+				if (this.isLoginProcess) {
+					return
+				}
+				this.isLoginProcess = true
 				for (let key in this.formData) {
 					let action = '输入'
 					if (key === 'tenant') {
@@ -149,13 +150,122 @@
 					}
 					if (!this.formData[key].text) {
 						this.errorMsg = `请${action}${this.formData[key].label}`
+						this.isLoginProcess = false
 						return
 					}
 				}
-				console.log('doLogin')
+				this.validatCaptcha()
+			},
+			validatCaptcha() {
+				uni.$myUtils.request({
+					api: validatCheckCode,
+					params: {
+						code: this.formData.captcha.text
+					}
+				}).then((response) => {
+					let data = response.data
+					if (data === false) {
+						this.getCaptcha(() => {
+							this.isLoginProcess = false
+							this.formData.captcha.text = ''
+							this.errorMsg = '验证码错误'
+						})
+					} else {
+						this.requestLogin()
+					}
+				}).catch(() => {
+					this.getCaptcha(() => {
+						this.isLoginProcess = false
+						this.formData.captcha.text = ''
+						this.errorMsg = '验证码错误'
+					})
+				})
 			},
 			requestLogin() {
-
+				let params = {
+					username: this.formData.account.text,
+					// password: this.formData.password.text,
+					password: utils.Encrypt(this.formData.password.text),
+					code: this.formData.captcha.text
+				}
+				uni.$myUtils.request({
+					api: login,
+					params,
+					header: {
+						tenant: this.formData.tenant.tenantCode
+					},
+					loadingText: '登录中...'
+				}).then((res) => {
+					this.$store.commit('SET_isSignedIn', true)
+					this.toHomePage()
+					this.saveLoginInfo()
+				}).catch((error) => {
+					this.$store.commit('SET_isSignedIn', false)
+					this.getCaptcha(() => {
+						this.isLoginProcess = false
+						this.formData.captcha.text = ''
+						this.errorMsg = error.data.errorMessage || error.data.message || '登录失败！'
+					})
+				})
+			},
+			toHomePage() {
+				this.$store.dispatch('userGetInfo').then((res) => {
+					// if (res.data.needResetPassword === 1) {
+					// 	this.$router.push({
+					// 		path: '/modifyPassword',
+					// 		query: {
+					// 			account: this.account
+					// 		}
+					// 	})
+					// 	return
+					// }
+					// if (res.data.isReadAgreement === 0) {
+					// 	this.$router.push({
+					// 		path: '/acceptSecurityAgreements',
+					// 		query: {
+					// 			openConfidentiality: this.sysConfig.openConfidentiality
+					// 		}
+					// 	})
+					// 	return
+					// }
+					// if (this.sysConfig.openConfidentiality) {
+					// 	this.$router.push({
+					// 		path: '/confidentiality'
+					// 	})
+					// 	return
+					// }
+					uni.$myRoute.router({
+						url: uni.$myUtils.config.homePath,
+						type: 'switchTab',
+						params: {
+							fromLogin: true
+						}
+					})
+					this.isLoginProcess = false
+				})
+			},
+			getLoginInfo() {
+				const info = uni.getStorageSync('loginInfo') || {
+					tenantCode: '',
+					tenantName: '',
+					account: ''
+				}
+				const {
+					tenantCode,
+					tenantName,
+					account
+				} = info
+				this.formData.tenant.tenantCode = tenantCode
+				this.formData.tenant.text = tenantName
+				this.formData.account.text = account
+			},
+			saveLoginInfo() {
+				// 保存上次登录时选择的单位和账号
+				uni.setStorageSync('loginInfo', {
+					tenantCode: this.formData.tenant.tenantCode,
+					tenantName: this.formData.tenant.text,
+					account: this.formData.account.text
+				})
 			}
 		}
 	}
@@ -178,11 +288,12 @@
 			/* #endif */
 			z-index: 1;
 			color: $cloud-theme-color;
-			height: 50rpx;
-			width: 100%;
+			height: auto;
+			width: calc(100% - 40px);
 			display: flex;
 			justify-content: center;
 			align-items: center;
+			padding: 0 20px;
 		}
 
 		.logo-container {

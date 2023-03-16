@@ -3,7 +3,7 @@
 		<!-- <view class="status-bar"></view> -->
 		<!-- 自定义导航栏 -->
 		<uni-nav-bar :title="navbarTitle" backgroundColor="#44474d" fixed="true" statusBar="true" color="#ffffff"
-			:left-icon="leftIcon" :height="50" :leftWidth="70" :rightWidth="70" @clickLeft='clickLeft'>
+			:left-icon="leftIcon" :height="50" :leftWidth="80" :rightWidth="80" @clickLeft='clickLeft'>
 			<view class="clear-float navbar-text-container" slot="right">
 				<text class="left-text" @tap="clickLeftText">{{ leftText }}</text>
 				<text class="right-text" @tap="clickRightText">{{ rightText }}</text>
@@ -12,9 +12,9 @@
 		<!-- 导航栏操作popup -->
 		<view class="popup-container">
 			<uni-popup ref="popup" background-color="#fff" @change="popupChange">
-				<view class="popup-content">
-					<text class="text">popup 内容</text>
-				</view>
+				<operate-popup :page-type="pageType" :dir-id="listParam.fileId" :dir-name="listParam.fileName"
+					:permission-type="permissionType" :file-category="fileCategory">
+				</operate-popup>>
 			</uni-popup>
 		</view>
 		<!-- 列表 -->
@@ -25,6 +25,11 @@
 </template>
 
 <script>
+	import {
+		getPersonalFile,
+		getShareFile
+	} from '@/common/apis/file/file.js'
+
 	export default {
 		name: "file-page",
 		props: {
@@ -38,83 +43,24 @@
 				statusBar: 0, //状态栏高度
 				isSelecting: false,
 				breadCrumb: [],
-				status: 'more',
+				status: 'noMore',
 				statusOptions: ['more', 'loading', 'noMore'],
 				contentText: {
 					contentdown: '上拉查看更多',
 					contentrefresh: '加载中...',
 					contentnomore: '没有更多数据了'
 				},
-				listData: [{
-						id: 1
-					},
-					{
-						id: 2
-					},
-					{
-						id: 3
-					},
-					{
-						id: 4
-					},
-					{
-						id: 5
-					},
-					{
-						id: 6
-					},
-					{
-						id: 7
-					},
-					{
-						id: 8
-					},
-					{
-						id: 9
-					},
-					{
-						id: 10
-					},
-					{
-						id: 11
-					},
-					{
-						id: 12
-					},
-					{
-						id: 13
-					},
-					{
-						id: 14
-					},
-					{
-						id: 15
-					},
-					{
-						id: 16
-					},
-					{
-						id: 17
-					},
-					{
-						id: 18
-					},
-					{
-						id: 19
-					},
-					{
-						id: 20
-					},
-					{
-						id: 21
-					},
-					{
-						id: 22
-					},
-					{
-						id: 23
-					}
-				]
+				listParam: {
+					fileId: 'rootpath',
+					fileName: 'rootpath',
+					page: 0,
+					size: 15,
+					type: 'gmt_modified',
+					order: 1
+				},
+				listData: [],
+				isLast: true,
+				permissionType: -1
 			}
 		},
 		computed: {
@@ -144,36 +90,65 @@
 				return title
 			},
 			leftText() {
-				return this.isSelecting ? this.isSelectedAll ? '反全选' : '全选' : '操作'
+				return this.isSelecting ? this.isSelectedAll ? '取消全选' : '全选' : '操作'
 			},
 			isSelectedAll() {
 				return true
 			},
 			rightText() {
 				return this.isSelecting ? '取消' : '选择'
+			},
+			fileCategory() {
+				let fileCategory
+				switch (this.pageType) {
+					case 'personal':
+						fileCategory = 1
+						break
+					case 'share':
+						fileCategory = 2
+						break
+					case 'publicSpace':
+						fileCategory = 3
+						break
+					default:
+						fileCategory = -1
+						break
+				}
+				return fileCategory
 			}
 		},
-		beforeCreate() {
-			setTimeout(() => {
-				this.breadCrumb.push('1')
-			}, 3000)
+		watch: {
+			listParam: {
+				handler(newValue) {
+					console.log('listParam newValue', newValue)
+				},
+				deep: true
+			}
+		},
+		created() {
+			// this.refreshList()
 		},
 		beforeMount() {
+			console.log('beforeMount')
+			uni.$on('refreshList', this.refreshList)
 			uni.$on('loadMore', this.loadMore)
 		},
 		beforeDestroy() {
 			console.log('beforeDestroy')
+			uni.$off('refreshList', this.refreshList)
 			uni.$off('loadMore', this.loadMore)
 		},
 		methods: {
 			clickLeft() {
+				if (!this.leftIcon) {
+					return
+				}
 				console.log('back <<<<<<<<<<<')
 			},
 			clickRight() {
 
 			},
 			clickLeftText() {
-				console.log('left')
 				if (this.isSelecting) {
 					// 全选/取消全选
 					if (this.isSelectedAll) {
@@ -187,17 +162,70 @@
 				}
 			},
 			clickRightText() {
-				console.log('right')
 				this.isSelecting = !this.isSelecting
 			},
-			popupChange() {
-
+			popupChange(e) {
+				console.log('popupChange', e)
+			},
+			getListData(isLoadMore = false) {
+				let targetApi
+				switch (this.pageType) {
+					case 'personal':
+						targetApi = getPersonalFile
+						break
+					case 'share':
+						targetApi = getShareFile
+						break
+					default:
+						targetApi = ''
+						break
+				}
+				return new Promise((resolve, reject) => {
+					uni.$myUtils.request({
+						api: targetApi,
+						params: this.listParam
+					}).then((res) => {
+						console.log('getListData data ==========>', res)
+						let data = res.data
+						if (!isLoadMore) {
+							this.listData = data.content
+						}
+						this.isLast = data.last
+						this.status = data.last ? this.statusOptions[2] : this.statusOptions[0]
+						this.permissionType = data.permissionType || -1
+						resolve(data)
+					}).catch((error) => {
+						console.log('getListData error', error)
+					})
+				})
+			},
+			reset() {
+				// this.listData = []
+				this.listParam.page = 0
+				// this.listParam = {
+				// 	fileId: 'rootpath',
+				// 	page: 0,
+				// 	size: 20,
+				// 	type: 'gmt_modified',
+				// 	order: 1
+				// }
+			},
+			refreshList() {
+				this.reset()
+				this.getListData().finally(() => {
+					uni.stopPullDownRefresh()
+				})
 			},
 			loadMore() {
+				if (this.isLast) {
+					return
+				}
+				this.listParam.page++
 				this.status = this.statusOptions[1]
-				setTimeout(() => {
-					this.status = this.statusOptions[0]
-				}, 2000)
+				this.getListData(true).then((newData) => {
+					console.log('loadMore newData', newData)
+					this.listData = this.listData.concat(newData.content)
+				})
 			}
 		}
 	}
@@ -212,6 +240,10 @@
 	}
 
 	.file-page-container {
+		/* #ifdef H5 */
+		padding-bottom: calc(40px + 50rpx);
+		/* #endif */
+
 		.navbar-text-container {
 			width: 100%;
 
@@ -222,18 +254,6 @@
 			.right-text {
 				float: right;
 			}
-		}
-
-		.popup-content {
-			@include flex;
-			align-items: center;
-			justify-content: center;
-			padding: 30rpx;
-			height: 150rpx;
-			background-color: #fff;
-			position: relative;
-			z-index: 999;
-			top: calc(var(--status-bar-height) + 50px);
 		}
 	}
 </style>
