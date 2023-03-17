@@ -57,8 +57,7 @@ export class Uploader {
 		chunkSize = 10485760,
 		maxUploadSize = 4096,
 		header = {},
-		formData = {},
-		removeFileFn = () => {},
+		formData = {}
 	}) {
 		this.key = key
 		this.url = url
@@ -67,7 +66,6 @@ export class Uploader {
 		this.maxUploadSize = maxUploadSize
 		this.header = header
 		this.formData = formData
-		this.removeFileFn = removeFileFn
 	}
 
 	// 构造文件对象
@@ -191,7 +189,6 @@ export class Uploader {
 	// TODO:从缓存中删除会触发onChange事件 为防止vuex中的文件数组异常 通过标识符控制
 	addQueue(file) {
 		let pass = this.preCheck(file)
-		this.removeFileFn(file.name)
 		if (pass) {
 			// this.startUpload(file)
 			return file
@@ -249,7 +246,7 @@ export class Uploader {
 			}
 			let chunkBlob = blob.slice(start, end) // 获取切片blob
 			let addFileResult = await this.addFile(file, chunkBlob).then(res => {
-				console.log('addFile 成功 res', res)
+				console.log('addFile 单次请求 成功 res', res)
 				// if (file.chunk + 1 === totalPieces && res.filepath) {
 				// 	this.fileurl = res.filepath
 				// 	file.percent = 100
@@ -261,7 +258,7 @@ export class Uploader {
 				}
 				return result
 			}).catch((error) => {
-				console.log('addFile 失败 error', error)
+				console.log('addFile 单次请求 失败 error', error)
 				result = {
 					state: 'fail',
 					info: error

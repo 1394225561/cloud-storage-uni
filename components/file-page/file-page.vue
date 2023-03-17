@@ -12,8 +12,7 @@
 		<!-- 导航栏操作popup -->
 		<view class="popup-container">
 			<uni-popup ref="popup" background-color="#fff" @change="popupChange">
-				<operate-popup :page-type="pageType" :dir-id="listParam.fileId" :dir-name="listParam.fileName"
-					:permission-type="permissionType" :file-category="fileCategory">
+				<operate-popup :page-type="pageType" :permission-type="permissionType" :option="option">
 				</operate-popup>>
 			</uni-popup>
 		</view>
@@ -21,6 +20,8 @@
 		<file-list :list-data="listData"></file-list>
 		<!-- 上拉加载更多 -->
 		<uni-load-more color="#007AFF" :status="status" :contentText='contentText' />
+		<i-uploader :page-type="pageType" :dir-id="listParam.fileId" :dir-name="listParam.fileName"
+			:file-category="fileCategory" :option="option"></i-uploader>
 	</view>
 </template>
 
@@ -28,6 +29,9 @@
 	import {
 		getPersonalFile,
 		getShareFile
+	} from '@/common/apis/file/file.js'
+	import {
+		fileUpload
 	} from '@/common/apis/file/file.js'
 
 	export default {
@@ -49,6 +53,25 @@
 					contentdown: '上拉查看更多',
 					contentrefresh: '加载中...',
 					contentnomore: '没有更多数据了'
+				},
+				// 上传接口参数
+				option: {
+					// 上传服务器地址
+					url: uni.$myUtils.config.baseUrl.cloudStorage + fileUpload.path,
+					// 上传附件的key
+					name: 'file',
+					// 根据你接口需求自定义请求头,默认不要写content-type,让浏览器自适配
+					header: {
+						// 示例参数可删除
+						'Authorization': 'bearer eyJhbGciOiJSUzI1NiIsI',
+						'uid': '99',
+						'client': 'app',
+						'accountid': 'DP',
+					},
+					// 根据你接口需求自定义body参数
+					formData: {
+						// 'orderId': 1000
+					}
 				},
 				listParam: {
 					fileId: 'rootpath',

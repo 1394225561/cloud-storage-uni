@@ -26,11 +26,15 @@ const handleOverwirteRoute = () => {
 			const {
 				url: path
 			} = options
-			if (!whiteList.includes(path.split("?")[0])) {
-				uni.$myRoute.router(loginPath)
-			} else {
-				console.log('handleOverwirteRoute options', options)
+			console.log('重写switchTab、navigateBack options', options)
+			if (type === 'navigateBack') {
 				return original.call(this, options)
+			} else {
+				if (!whiteList.includes(path.split("?")[0])) {
+					uni.$myRoute.router(loginPath)
+				} else {
+					return original.call(this, options)
+				}
 			}
 		}
 	})
