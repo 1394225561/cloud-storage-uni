@@ -123,10 +123,12 @@
 				console.log('当前选择的文件列表：', JSON.stringify([...files.values()]));
 				let currentFiles = [...files.values()]
 				if (this.filesProcessing) {
-					console.log('文件上传处理中，请稍后重试')
-					currentFiles.forEach((file) => {
-						this.clear(file.name)
-					})
+					if (currentFiles.length) {
+						console.log('文件上传处理中，请稍后重试')
+						this.clear()
+					} else {
+						console.log('文件数量为0')
+					}
 					return
 				}
 				this.filesProcessing = true

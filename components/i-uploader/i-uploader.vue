@@ -91,16 +91,16 @@
 					})
 					// 判断加入上传队列的文件是否允许上传
 					let currentUploadFile = this.uploaderInstance.addQueue(fileObj)
-					// 及时从缓存中清除选中的文件 防止继续选择文件出现异常
-					uni.$emit('clearFile', fileObj.name)
 					await this.prepareUpload(currentUploadFile, i)
 				}
+				// 及时从缓存中清除选中的文件 防止继续选择文件出现异常
+				uni.$emit('clearFile')
 				uni.$emit('filesProcessingEnd')
 			},
 			prepareUpload(currentUploadFile, index) {
 				return new Promise((resolve, reject) => {
 					if (currentUploadFile) {
-						console.log('---------- startUpload currentUploadFile',
+						console.log('---------- startUpload currentUploadFile true',
 							index, currentUploadFile)
 
 						// #ifdef H5
@@ -118,14 +118,14 @@
 						// 通过$nextTick防止一次选择多个文件时 renderjs只能接收到最后一个文件
 						// #ifdef APP-PLUS
 						this.$nextTick(() => {
-							// 坑：修改引用地址并不能触发renderjs对数据的监听 只有属性的增删改才能触发回调
 							this.currentUploadFile = currentUploadFile
+							// 坑：修改引用地址并不能触发renderjs对数据的监听 只有属性的增删改才能触发回调
 							this.currentUploadFile.token = Date.now()
 							resolve()
 						})
 						// #endif
 					} else {
-						console.log('---------- startUpload currentUploadFile',
+						console.log('---------- startUpload currentUploadFile false',
 							index, currentUploadFile)
 						resolve()
 					}
@@ -188,7 +188,7 @@
 				// console.log('ownerInstance', ownerInstance)
 				if (newValue && newValue.file) {
 					if (!oldValue || oldValue.id !== newValue.id) {
-						console.log('nnnnnnnnnnnnewValue', newValue)
+						console.log('nnnnnnnewValue ==========', newValue)
 						this.uploaderInstanceRenderjs.startUpload(newValue).then((res) => {
 							ownerInstance.callMethod('onuploadEnd', res)
 						}).catch((error) => {
