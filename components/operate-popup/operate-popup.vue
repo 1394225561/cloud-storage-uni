@@ -120,13 +120,17 @@
 			upload() {},
 			// 文件选择回调
 			onChange(files) {
+				// clear() 清除文件缓存Map的操作也会调用onChange
 				console.log('当前选择的文件列表：', JSON.stringify([...files.values()]));
 				let currentFiles = [...files.values()]
 				if (this.filesProcessing) {
+					// 如果选择的文件还在处理中 
 					if (currentFiles.length) {
+						// 选择了新文件 需要提示并清空
 						console.log('文件上传处理中，请稍后重试')
 						this.clear()
 					} else {
+						// 此时为触发了clear()
 						console.log('文件数量为0')
 					}
 					return
@@ -135,7 +139,7 @@
 				uni.$emit(`create${this.pageType}File`, currentFiles)
 			},
 			// 移除某个文件
-			clear(name = null) {
+			clear(name) {
 				// name=指定文件名，不传name默认移除所有文件
 				this.$refs[this.uploaderRef][0].clear(name);
 			}

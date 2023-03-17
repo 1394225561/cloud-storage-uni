@@ -10,7 +10,6 @@
 	import {
 		Uploader
 	} from '@/utils/uploader.js'
-	import utils from '@/utils/utils.js'
 
 	export default {
 		name: "i-uploader",
@@ -90,45 +89,47 @@
 						isUploadingNew: this.uploadNewId ? true : false
 					})
 					// 判断加入上传队列的文件是否允许上传
-					let currentUploadFile = this.uploaderInstance.addQueue(fileObj)
-					await this.prepareUpload(currentUploadFile, i)
+					let addQueueResult = this.uploaderInstance.addQueue(fileObj)
+					// 保存数据到vuex
+					uni.$myStore.commit('SET_uploaderList', {
+						...fileObj,
+						...addQueueResult.stateObj
+					})
+					if (addQueueResult.pass) {
+						await this.prepareUpload(fileObj, i)
+					}
 				}
-				// 及时从缓存中清除选中的文件 防止继续选择文件出现异常
+				// 单次所有文件处理完以后 及时从缓存中清除选中的文件 防止继续选择文件出现异常
 				uni.$emit('clearFile')
+				// 修改标识位 允许选择新文件
 				uni.$emit('filesProcessingEnd')
 			},
 			prepareUpload(currentUploadFile, index) {
 				return new Promise((resolve, reject) => {
-					if (currentUploadFile) {
-						console.log('---------- startUpload currentUploadFile true',
-							index, currentUploadFile)
+					console.log('---------- startUpload currentUploadFile',
+						index, currentUploadFile)
 
-						// #ifdef H5
-						this.uploaderInstance.startUpload(currentUploadFile).then((res) => {
-							this.onuploadEnd(res)
-						}).catch((error) => {
-							this.onuploadEnd(error)
-						})
-						resolve()
-						// #endif
+					// #ifdef H5
+					this.uploaderInstance.startUpload(currentUploadFile).then((res) => {
+						this.onuploadEnd(res)
+					}).catch((error) => {
+						this.onuploadEnd(error)
+					})
+					resolve()
+					// #endif
 
-						// app端上传需要借用renderjs能力
-						// renderjs 通过监听数据改变进行通讯
-						// 涉及到数据异步更新机制
-						// 通过$nextTick防止一次选择多个文件时 renderjs只能接收到最后一个文件
-						// #ifdef APP-PLUS
-						this.$nextTick(() => {
-							this.currentUploadFile = currentUploadFile
-							// 坑：修改引用地址并不能触发renderjs对数据的监听 只有属性的增删改才能触发回调
-							this.currentUploadFile.token = Date.now()
-							resolve()
-						})
-						// #endif
-					} else {
-						console.log('---------- startUpload currentUploadFile false',
-							index, currentUploadFile)
+					// app端上传需要借用renderjs能力
+					// renderjs 通过监听数据改变进行通讯
+					// 涉及到数据异步更新机制
+					// 通过$nextTick防止一次选择多个文件时 renderjs只能接收到最后一个文件
+					// #ifdef APP-PLUS
+					this.$nextTick(() => {
+						this.currentUploadFile = currentUploadFile
+						// 坑：修改引用地址并不能触发renderjs对数据的监听 只有属性的增删改才能触发回调
+						this.currentUploadFile.token = Date.now()
 						resolve()
-					}
+					})
+					// #endif
 				})
 			},
 			// 某文件上传结束回调(成功失败都回调)
@@ -147,7 +148,6 @@
 	import {
 		Uploader
 	} from '@/utils/uploader.js'
-	import utils from '@/utils/utils.js'
 
 	export default {
 		data() {

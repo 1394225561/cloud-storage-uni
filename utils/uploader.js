@@ -122,78 +122,59 @@ export class Uploader {
 		const isExe = suffix === 'exe'
 		// true能传
 		const canUpload = canBeUploadTypeData[0] === '*' ? true : canBeUploadTypeData.indexOf(suffix) !== -1
+		let result = {}
 		// 文件剩余容量判断
 		if (file.size > uni.$myStore.getters.details.quota - uni.$myStore.getters.details.usedSize) {
-			const fileObj = {
-				...file,
+			result.stateObj = {
 				stateCode: 'intercept',
 				state: '拦截',
 				stateText: '用户剩余容量不足,如有疑问请联系管理员！'
 			}
-			uni.$myStore.commit('SET_uploaderList', fileObj)
-			// uni.$myStore.commit('SET_interceptList', fileObj)
-			// this.syncFile(true)
-			return false
-		}
-		if (file.size === 0) {
-			const fileObj = {
-				...file,
+			result.pass = false
+		} else if (file.size === 0) {
+			result.stateObj = {
 				stateCode: 'intercept',
 				state: '拦截',
 				stateText: '空文件暂不支持上传！'
 			}
-			uni.$myStore.commit('SET_uploaderList', fileObj)
-			// uni.$myStore.commit('SET_interceptList', fileObj)
-			// this.syncFile(true)
-			return false
-		}
-		// 文件上限判断
-		if (file.size / (1024 * 1024) > this.maxUploadSize) {
-			const fileObj = {
-				...file,
+			result.pass = false
+		} else if (file.size / (1024 * 1024) > this.maxUploadSize) {
+			// 文件上限判断
+			result.stateObj = {
 				stateCode: 'intercept',
 				state: '拦截',
 				stateText: '文件大小超过系统设置,如有疑问请联系管理员！'
 			}
-			uni.$myStore.commit('SET_uploaderList', fileObj)
-			// uni.$myStore.commit('SET_interceptList', fileObj)
-			// this.syncFile(true)
-			return false
-		}
-		// 文件格式判断
-		if (isExe || !canUpload) {
-			const fileObj = {
-				...file,
+			result.pass = false
+		} else if (isExe || !canUpload) {
+			// 文件格式判断
+			result.stateObj = {
 				stateCode: 'intercept',
 				state: '拦截',
 				stateText: '暂不支持此格式上传,如有疑问请联系管理员！'
 			}
-			uni.$myStore.commit('SET_uploaderList', fileObj)
-			// uni.$myStore.commit('SET_interceptList', fileObj)
-			// this.syncFile(true)
-			return false
+			result.pass = false
+		} else {
+			result.stateObj = {
+				stateCode: 'uploading',
+				state: '开始上传',
+				stateText: '文件开始上传处理！'
+			}
+			result.pass = true
 		}
-		uni.$myStore.commit('SET_uploaderList', file)
-		uni.$myStore.commit('SET_fileState', {
-			id: file.id,
-			stateCode: 'uploading',
-			state: '开始上传',
-			stateText: '文件开始上传处理！'
-		})
-		file.chunk = 0
-		return true
+		// uni.$myStore.commit('SET_fileState', {
+		// 	id: file.id,
+		// 	stateCode: 'uploading',
+		// 	state: '开始上传',
+		// 	stateText: '文件开始上传处理！'
+		// })
+		return result
 	}
 	// 加入队列 修改状态为开始上传
 	// 前置校验通过的开始上传请求处理
-	// 前置校验结束的 无论是否通过 都需要清除内存中的临时文件 防止下次选择文件后有旧文件
-	// TODO:从缓存中删除会触发onChange事件 为防止vuex中的文件数组异常 通过标识符控制
 	addQueue(file) {
-		let pass = this.preCheck(file)
-		if (pass) {
-			// this.startUpload(file)
-			return file
-		}
-		return false
+		let preCheckResult = this.preCheck(file)
+		return preCheckResult
 	}
 	// 判断能否秒传
 	secondUpload() {}
@@ -247,10 +228,6 @@ export class Uploader {
 			let chunkBlob = blob.slice(start, end) // 获取切片blob
 			let addFileResult = await this.addFile(file, chunkBlob).then(res => {
 				console.log('addFile 单次请求 成功 res', res)
-				// if (file.chunk + 1 === totalPieces && res.filepath) {
-				// 	this.fileurl = res.filepath
-				// 	file.percent = 100
-				// }
 				start = end
 				file.chunk++
 				result = {

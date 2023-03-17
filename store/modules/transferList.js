@@ -52,6 +52,7 @@ const transferList = {
 			// 深拷贝 防止修改vuex数据导致外部数据异常
 			let result = utils.cloneDeep(file)
 			state.uploaderList.unshift(result)
+			console.log('SET_uploaderList', state.uploaderList)
 		},
 		SET_waitFileList: (state, payload) => {
 			state.waitFileList = payload
@@ -68,7 +69,7 @@ const transferList = {
 					state.uploaderList.splice(i, 1, Object.assign({}, state.uploaderList[i], payload))
 				}
 			}
-			console.log('state.uploaderList', state.uploaderList)
+			console.log('SET_fileState', state.uploaderList)
 		},
 		SET_DOWNLOAD_FILE_LIST(state, payload) {
 			state.downloadFileList = payload
