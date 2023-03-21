@@ -82,8 +82,9 @@ function throttle(func, delay = 1000) {
 
 		wait = true
 		func(...args)
-		setTimeout(() => {
+		let timer = setTimeout(() => {
 			wait = false
+			clearTimeout(timer)
 		}, delay)
 	}
 }

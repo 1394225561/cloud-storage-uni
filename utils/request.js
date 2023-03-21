@@ -33,8 +33,9 @@ export const request = function({
 
 	// app端设置请求头cookie
 	// #ifdef APP-PLUS
-	// console.log('uni.$myUtils.loginPersistence.cookieValue', uni.$myUtils.loginPersistence.cookieValue)
-	options.header['Cookie'] = uni.$myUtils.loginPersistence.cookieValue
+	if (uni.$myUtils.loginPersistence.cookieValue) {
+		options.header['Cookie'] = uni.$myUtils.loginPersistence.cookieValue
+	}
 	// #endif
 
 	if (options.method === 'POST') {
@@ -119,7 +120,10 @@ function handleResult(data) {
 	// app端 保存cookie
 	// #ifdef APP-PLUS
 	if (data.cookies.length) {
-		uni.$myUtils.loginPersistence.setCookie(data.cookies[0])
+		let sessionCookie = data.cookies.filter((data) => {
+			return data.indexOf('SESSION=') !== -1
+		})
+		uni.$myUtils.loginPersistence.setCookie(sessionCookie[0])
 	}
 	// #endif
 }
@@ -165,7 +169,10 @@ export function showSuccessMsg(msg = '成功！') {
 }
 
 export function toLogin() {
-	uni.$myRoute.router(uni.$myUtils.config.loginPath)
+	uni.$myRoute.router({
+		url: uni.$myUtils.config.loginPath,
+		type: 'redirectTo'
+	})
 	uni.$myUtils.loginPersistence.clearCookie()
 }
 

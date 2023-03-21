@@ -1,7 +1,9 @@
 import utils from './utils.js'
 
 export class Downloader {
+	// #ifdef APP-PLUS
 	static downloadPath = plus.io.convertLocalFileSystemURL('_downloads')
+	// #endif
 
 	constructor() {
 		// #ifdef APP-PLUS
@@ -26,10 +28,11 @@ export class Downloader {
 		// TODO: 下载前置检查
 		let that = this
 		let url = uni.$myUtils.config.baseUrl.cloudStorage + requestPath
+		let fileName = file.fileName
 
 		// #ifdef APP-PLUS
 		let fullDownloadPath = 'file://' + Downloader.downloadPath
-		let filename = fullDownloadPath + file.fileName // 利用保存路径，实现下载文件的重命名
+		let filename = fullDownloadPath + fileName // 利用保存路径，实现下载文件的重命名
 		let dtask = plus.downloader.createDownload(url, {
 			// 不支持保存到系统公共目录
 			filename
@@ -40,7 +43,7 @@ export class Downloader {
 				// d.filename是文件在保存在本地的相对路径，使用下面的API可转为平台绝对路径
 				let fileSaveUrl = plus.io.convertLocalFileSystemURL(d.filename)
 				console.log('fileSaveUrl', fileSaveUrl)
-				that.savePath && that.moveFile(fileSaveUrl, file.fileName)
+				that.savePath && that.moveFile(fileSaveUrl, fileName)
 			} else {
 				uni.$myUtils.showErrorMsg("下载失败")
 				plus.downloader.clear() // 清除下载任务?
@@ -53,7 +56,14 @@ export class Downloader {
 		// #endif
 
 		// #ifdef H5
-
+		let eleLink = document.createElement('a')
+		eleLink.style.display = 'none'
+		eleLink.href = url
+		// eleLink.download = fileName
+		// eleLink.target = '_blank'
+		document.body.appendChild(eleLink)
+		eleLink.click()
+		document.body.removeChild(eleLink)
 		// #endif
 	}
 

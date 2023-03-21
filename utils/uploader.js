@@ -7,6 +7,8 @@
 // Android & h5
 // 插件id lsj-upload
 
+import utils from './utils.js'
+
 /**
  * @description 上传类
  * 提供方法：
@@ -66,6 +68,9 @@ export class Uploader {
 		this.maxUploadSize = maxUploadSize
 		this.header = header
 		this.formData = formData
+		// #ifdef H5
+		this.onProgressH5 = utils.throttle(this.onprogress)
+		// #endif
 	}
 
 	// 构造文件对象
@@ -218,6 +223,7 @@ export class Uploader {
 		while (start <= fileSize) {
 			if (file.chunk >= totalPieces) {
 				result = {
+					...result,
 					state: 'complete'
 				}
 				break
@@ -232,14 +238,15 @@ export class Uploader {
 				start = end
 				file.chunk++
 				result = {
-					state: 'success'
+					state: 'success',
+					response: res
 				}
 				return result
 			}).catch((error) => {
 				console.log('addFile 单次请求 失败 error', error)
 				result = {
 					state: 'fail',
-					info: error
+					response: error
 				}
 				return result
 			})
@@ -275,11 +282,10 @@ export class Uploader {
 		return new Promise((resolve, reject) => {
 			let xmlRequest = new XMLHttpRequest()
 			xmlRequest.open(this.uploadMethod, this.url, true)
-
+			xmlRequest.withCredentials = true
 			for (let keys in this.header) {
 				xmlRequest.setRequestHeader(keys, this.header[keys])
 			}
-
 			xmlRequest.upload.addEventListener(
 				'progress',
 				(event) => {
@@ -289,19 +295,17 @@ export class Uploader {
 						let progress = Math.ceil((uploaded * 100) / file.size)
 						file.progress = progress < 100 ? progress : 100
 						// #ifdef H5
-						this.onprogress(file)
+						this.onProgressH5(file)
 						// #endif
 					}
 				}
 			)
-
 			xmlRequest.ontimeout = () => {
 				return reject({
 					status: 5001,
 					text: '请求超时'
 				})
 			}
-
 			xmlRequest.onreadystatechange = ev => {
 				// console.log('xmlRequest', xmlRequest)
 				// console.log('ev', ev)
@@ -337,11 +341,21 @@ export class Uploader {
 	// 轮询上传后的文件状态 是否涉敏涉密
 	checkFileStatus() {}
 	// 上传成功
-	uploadSuccess(cb, file, response) {}
+	uploadSuccess(cb, response) {
+		console.log('~~~~~~~~~~~~~~~ uploadSuccess', response)
+		console.log(cb)
+	}
 	// 上传失败
-	uploadFail(cb, file, error) {}
+	uploadFail(cb, error) {
+		console.log('!!!!!!!!!!!!!!! uploadFail', error)
+		console.log(cb)
+	}
 	// 上传完成
 	uploadComplete(result) {
-		console.log('~~~~~~~~~~~~~~~ uploadComplete result', result)
+		if (result.state === "complete") {
+			this.uploadSuccess(undefined, result)
+		} else {
+			this.uploadFail(undefined, result)
+		}
 	}
 }

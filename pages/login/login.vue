@@ -26,15 +26,8 @@
 			</view>
 			<button type="default" class="login-button" @click="doLogin">登 录</button>
 		</view>
-		<view class="popup-container">
-			<uni-popup ref="popup" background-color="#fff" @change="popupChange">
-				<view class="popup-content">
-					<view class="popup-content__tree-container">
-					</view>
-					<button type="default" class="login-button" @click="confirmTenant">确 定</button>
-				</view>
-			</uni-popup>
-		</view>
+		<tki-tree ref="tkitree" :range="tenantList" idKey="tenantCode" rangeKey="tenantName" :selectParent="true"
+			@confirm="confirmTenant" confirmColor="#44474d" cancelColor="#44474d" />
 	</view>
 </template>
 
@@ -130,13 +123,15 @@
 				})
 			},
 			selectTenant() {
-				this.$refs.popup.open('bottom')
+				this.$nextTick(() => {
+					this.$refs.tkitree._show()
+				})
 			},
-			popupChange() {
-
-			},
-			confirmTenant() {
-
+			confirmTenant(data) {
+				if (data.length) {
+					this.formData.tenant.tenantCode = data[0].tenantCode
+					this.formData.tenant.text = data[0].tenantName
+				}
 			},
 			doLogin() {
 				if (this.isLoginProcess) {
@@ -364,17 +359,6 @@
 
 		.login-button::after {
 			border: none;
-		}
-
-		.popup-container {
-			.popup-content {
-				.popup-content__tree-container {
-					width: calc(100vw - 20px);
-					height: 70vh;
-					padding: 10px;
-					overflow: auto;
-				}
-			}
 		}
 	}
 </style>
