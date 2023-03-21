@@ -3,17 +3,28 @@
 		<!-- <view class="status-bar"></view> -->
 		<!-- 自定义导航栏 -->
 		<uni-nav-bar :title="navbarTitle" backgroundColor="#44474d" fixed="true" statusBar="true" color="#ffffff"
-			:left-icon="leftIcon" :height="50" :leftWidth="80" :rightWidth="80" @clickLeft='clickLeft'>
+			:left-icon="leftIcon" :height="50" :leftWidth="70" :rightWidth="70" @clickLeft='clickLeft'>
 			<view class="clear-float navbar-text-container" slot="right">
 				<text class="left-text" @tap="clickLeftText">{{ leftText }}</text>
 				<text class="right-text" @tap="clickRightText">{{ rightText }}</text>
 			</view>
 		</uni-nav-bar>
-		<!-- 导航栏操作popup -->
 		<view class="popup-container">
+			<!-- 导航栏操作popup -->
 			<uni-popup ref="popup" background-color="#fff" @change="popupChange">
 				<operate-popup :page-type="pageType" :permission-type="permissionType" :option="option">
-				</operate-popup>>
+				</operate-popup>
+			</uni-popup>
+			<!-- 底部全选popup -->
+			<uni-popup ref="selectPopup" :mask-click="false" background-color="#fff" @change="selectPopupChange">
+				<view class="select-popup">
+					<text class="select-popup__select" @click="changeSelectedAll">
+						{{ isSelectedAll ? '取消全选' : '全选' }}
+					</text>
+					<text class="select-popup__text">
+						{{ `已选择${isSelectedAll}个文件` }}
+					</text>
+				</view>
 			</uni-popup>
 		</view>
 		<!-- 列表 -->
@@ -113,7 +124,8 @@
 				return title
 			},
 			leftText() {
-				return this.isSelecting ? this.isSelectedAll ? '取消全选' : '全选' : '操作'
+				// return this.isSelecting ? this.isSelectedAll ? '取消全选' : '全选' : '操作'
+				return '操作'
 			},
 			isSelectedAll() {
 				return true
@@ -172,23 +184,39 @@
 
 			},
 			clickLeftText() {
+				// if (this.isSelecting) {
+				// 	// 全选/取消全选
+				// 	if (this.isSelectedAll) {
+				// 		console.log('取消全选')
+				// 	} else {
+				// 		console.log('全选')
+				// 	}
+				// } else {
+				// 	// 展开下拉操作界面
+				// 	this.$refs.popup.open('top')
+				// }
 				if (this.isSelecting) {
-					// 全选/取消全选
-					if (this.isSelectedAll) {
-						console.log('取消全选')
-					} else {
-						console.log('全选')
-					}
-				} else {
-					// 展开下拉操作界面
-					this.$refs.popup.open('top')
+					return
 				}
+				this.$refs.popup.open('top')
 			},
 			clickRightText() {
+				if (this.isSelecting) {
+					this.$refs.selectPopup.close()
+				} else {
+					this.$refs.popup.close()
+					this.$refs.selectPopup.open('bottom')
+				}
 				this.isSelecting = !this.isSelecting
 			},
 			popupChange(e) {
 				console.log('popupChange', e)
+			},
+			selectPopupChange(e) {
+				console.log('selectPopupChange', e)
+			},
+			changeSelectedAll() {
+				console.log('this.isSelectedAll', this.isSelectedAll)
 			},
 			getListData(isLoadMore = false) {
 				let targetApi
@@ -276,6 +304,32 @@
 
 			.right-text {
 				float: right;
+			}
+		}
+
+		.popup-container {
+			.select-popup {
+				height: 80rpx;
+				display: flex;
+				align-items: center;
+				padding: 0 20px;
+				font-size: 12px;
+				position: relative;
+				z-index: 100;
+				/* #ifdef H5 */
+				bottom: 50px;
+				/* #endif */
+				background-color: white;
+
+				.select-popup__select {
+					flex: 1;
+					text-align: left;
+				}
+
+				.select-popup__text {
+					flex: 3;
+					text-align: right;
+				}
 			}
 		}
 	}

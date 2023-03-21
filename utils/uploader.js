@@ -205,6 +205,7 @@ export class Uploader {
 		blob = file.file
 		// #endif
 		// #ifdef APP-PLUS
+		// TODO: 异常处理
 		blob = await this.getBlobInApp(file)
 		// #endif
 		let totalPieces = file.chunks

@@ -97,7 +97,6 @@
 		},
 		onLoad() {
 			this.$store.dispatch('getSysConfig')
-			this.getCaptcha()
 			this.getTenantList()
 			this.getLoginInfo()
 		},
@@ -116,6 +115,7 @@
 				uni.$myUtils.request({
 					api: getTenantList
 				}).then((res) => {
+					this.getCaptcha()
 					let data = res.data
 					if (!data.length) {
 						return
@@ -123,7 +123,7 @@
 					for (let i = 0; i < data.length; i++) {
 						this.tenantList.push(data[i])
 					}
-					if (!data[0].children.length && data.length === 1) {
+					if (!data[0].children.length || data.length === 1) {
 						this.formData.tenant.text = data[0].tenantName
 						this.formData.tenant.tenantCode = data[0].tenantCode
 					}
@@ -165,8 +165,8 @@
 				}).then((response) => {
 					let data = response.data
 					if (data === false) {
+						this.isLoginProcess = false
 						this.getCaptcha(() => {
-							this.isLoginProcess = false
 							this.formData.captcha.text = ''
 							this.errorMsg = '验证码错误'
 						})
@@ -174,8 +174,8 @@
 						this.requestLogin()
 					}
 				}).catch(() => {
+					this.isLoginProcess = false
 					this.getCaptcha(() => {
-						this.isLoginProcess = false
 						this.formData.captcha.text = ''
 						this.errorMsg = '验证码错误'
 					})
@@ -197,12 +197,13 @@
 					loadingText: '登录中...'
 				}).then((res) => {
 					this.$store.commit('SET_isSignedIn', true)
+					this.isLoginProcess = false
 					this.toHomePage()
 					this.saveLoginInfo()
 				}).catch((error) => {
 					this.$store.commit('SET_isSignedIn', false)
+					this.isLoginProcess = false
 					this.getCaptcha(() => {
-						this.isLoginProcess = false
 						this.formData.captcha.text = ''
 						this.errorMsg = error.data.errorMessage || error.data.message || '登录失败！'
 					})
@@ -241,7 +242,6 @@
 							fromLogin: true
 						}
 					})
-					this.isLoginProcess = false
 				})
 			},
 			getLoginInfo() {

@@ -6,6 +6,9 @@ import {
 	toLogin,
 	LoginPersistence
 } from './request.js'
+import {
+	Downloader
+} from './downloader.js'
 
 const install = function(Vue, options) {
 	let utils = {
@@ -14,7 +17,8 @@ const install = function(Vue, options) {
 		showErrorMsg,
 		showSuccessMsg,
 		toLogin,
-		loginPersistence: new LoginPersistence()
+		loginPersistence: new LoginPersistence(),
+		downloader: new Downloader()
 	}
 	uni.$myUtils = utils
 	// Vue.prototype.$myUtils = utils

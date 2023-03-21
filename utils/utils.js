@@ -72,9 +72,26 @@ const eventBus = new Vue({
 	}
 })
 
+function throttle(func, delay = 1000) {
+	let wait = false
+
+	return (...args) => {
+		if (wait) {
+			return
+		}
+
+		wait = true
+		func(...args)
+		setTimeout(() => {
+			wait = false
+		}, delay)
+	}
+}
+
 export default {
 	Decrypt,
 	Encrypt,
 	cloneDeep,
-	eventBus
+	eventBus,
+	throttle
 }

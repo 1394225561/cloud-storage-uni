@@ -115,9 +115,15 @@
 			handleOperate(operate) {
 				this[operate.operate]()
 			},
-			createDir() {},
-			createTxt() {},
-			upload() {},
+			createDir() {
+				console.log('createDir')
+			},
+			createTxt() {
+				console.log('createTxt')
+			},
+			upload() {
+				console.log('upload')
+			},
 			// 文件选择回调
 			onChange(files) {
 				// clear() 清除文件缓存Map的操作也会调用onChange
@@ -156,7 +162,7 @@
 		height: 100rpx;
 		background-color: #fff;
 		position: relative;
-		z-index: 999;
+		z-index: 99;
 		top: calc(var(--status-bar-height) + 50px);
 
 		.operate-item {

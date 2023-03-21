@@ -5,6 +5,11 @@ export const fileUpload = {
 	dataType: 'application/x-www-form-urlencoded',
 	responseType: 'blob'
 }
+export const downloadSingle = {
+	path: '/api/file/download/single',
+	app: 'cloudStorage',
+	method: 'get'
+}
 export const getPersonalFile = {
 	path: '/api/file/list',
 	app: 'cloudStorage',
