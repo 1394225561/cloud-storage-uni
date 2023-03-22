@@ -1,7 +1,7 @@
 <template>
 	<uni-list class="list-container">
 		<view @click="onClick" class="bread-crumb">
-			{{ Downloader.downloadPath }}
+			面包屑
 		</view>
 		<uni-list-item v-for="(data, index) in listData" :key="data.id" :clickable="true" @click="downloadFile(data)"
 			:title="data.fileName + ''">
@@ -13,9 +13,6 @@
 	import {
 		downloadSingle
 	} from '@/common/apis/file/file.js'
-	import {
-		Downloader
-	} from '@/utils/downloader.js'
 
 	export default {
 		name: "file-list",
@@ -26,14 +23,11 @@
 			}
 		},
 		data() {
-			return {
-				Downloader,
-			}
+			return {}
 		},
 		methods: {
 			onClick(e) {
-				console.log('onClick', e)
-				console.log('plus.io.PUBLIC_DOWNLOADS', plus.io.convertLocalFileSystemURL('_downloads'))
+
 			},
 			downloadFile(file) {
 				let requestPath = downloadSingle.path + '?fileId=' + file.id
