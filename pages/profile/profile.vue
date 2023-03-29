@@ -58,7 +58,8 @@
 <style lang="scss" scoped>
 	.profile-container {
 		.downloadSavePath {
-			height: 50rpx;
+			height: 80rpx;
+			line-height: 80rpx;
 			width: 100%;
 			background-color: white;
 			white-space: nowrap;

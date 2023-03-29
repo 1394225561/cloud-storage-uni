@@ -7,7 +7,7 @@ export class Downloader {
 
 	constructor() {
 		// #ifdef APP-PLUS
-		this.absoluteDownloadPath = ''
+		// this.absoluteDownloadPath = ''
 		this.savePath = this.getSavePath()
 		this.onProgress = utils.throttle(this.commitProgress)
 		// #endif
@@ -120,8 +120,8 @@ export class Downloader {
 	handlePath(path) {
 		console.log('path', path)
 
-		this.absoluteDownloadPath = plus.io.convertLocalFileSystemURL(path)
-		console.log('this.absoluteDownloadPath', this.absoluteDownloadPath)
+		// this.absoluteDownloadPath = plus.io.convertLocalFileSystemURL(path)
+		// console.log('this.absoluteDownloadPath', this.absoluteDownloadPath)
 
 		let prefixPath = plus.io.convertLocalFileSystemURL('_downloads').split('/0/Android/data')[0]
 		let array = path.split('/tree/primary:')
