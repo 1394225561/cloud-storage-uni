@@ -1,7 +1,5 @@
 <template>
-	<view>
-		<i :class="['iconfont', iconFont]"></i>
-	</view>
+	<i :class="[isColourful ? 't-icon' : 'iconfont', iconFont]"></i>
 </template>
 
 <script>
@@ -11,11 +9,24 @@
 			icon: {
 				type: String,
 				require: true
+			},
+			// false 可以修改颜色 但图标不是彩色
+			// true 不可以修改颜色 但图标是彩色
+			// 默认是彩色图标
+			isColourful: {
+				type: Boolean,
+				default: true
 			}
 		},
 		computed: {
 			iconFont() {
-				return 'icon-' + this.icon
+				let prefix
+				if (this.isColourful) {
+					prefix = 't-icon-'
+				} else {
+					prefix = 'icon-'
+				}
+				return prefix + this.icon
 			}
 		},
 		data() {
@@ -27,10 +38,12 @@
 </script>
 
 <style lang="scss" scoped>
-	@import '@/common/styles/styles.scss';
+	.t-icon {
+		width: 44px;
+		height: 44px;
+	}
 
 	.iconfont {
 		font-size: 44px;
-		color: $cloud-theme-color;
 	}
 </style>

@@ -42,6 +42,7 @@
 	/*每个页面公共css */
 	@import '@/common/styles/styles.scss';
 	@import '@/uni_modules/uni-scss/index.scss';
+	@import '@/static/iconfont/iconfont-weapp-icon.css';
 
 	/* #ifndef APP-NVUE */
 	@import '@/static/customicons.css';

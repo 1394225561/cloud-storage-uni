@@ -31,18 +31,18 @@ const iv = CryptoJS.enc.Utf8.parse('1234567876543210') // 十六位十六进制�
 
 // 解密方法
 function Decrypt(word) {
-	var bytes = CryptoJS.AES.decrypt(word.toString(), key, {
+	let bytes = CryptoJS.AES.decrypt(word.toString(), key, {
 		iv,
 		mode: CryptoJS.mode.ECB,
 		padding: CryptoJS.pad.Pkcs7
 	})
-	var decryptResult = bytes.toString(CryptoJS.enc.Utf8)
+	let decryptResult = bytes.toString(CryptoJS.enc.Utf8)
 	return decryptResult.toString()
 }
 
 // 加密方法
 function Encrypt(word) {
-	var encryptResult = CryptoJS.AES.encrypt(word, key, {
+	let encryptResult = CryptoJS.AES.encrypt(word, key, {
 		iv,
 		mode: CryptoJS.mode.ECB,
 		padding: CryptoJS.pad.Pkcs7
@@ -89,10 +89,121 @@ function throttle(func, delay = 1000) {
 	}
 }
 
+function getIcon(data, typeFlag = 0) {
+	let fileName = data.fileName
+	if (typeFlag === 2 && data.isDir) {
+		// 共享文件根目录图标
+		return 'groupfolder-color'
+	} else if (data.isDir) {
+		return 'folder-color'
+	}
+	if (fileName !== '' || fileName !== undefined) {
+		let point = fileName.lastIndexOf('.')
+		let type = fileName.substring(point + 1).toLowerCase()
+		if (type === 'jpg' || type === 'gif' || type === 'png' || type === 'jpeg' || type === 'bmp') {
+			return 'picture-color'
+		} else if (type === 'avi' || type === 'rmvb' || type === 'rm' || type === 'asf' || type === 'divx' || type ===
+			'mpg' || type === 'mpeg' || type === 'mpe' || type === 'mp4' || type === 'mkv' || type === 'vob' || type ===
+			'wmv') {
+			return 'video-color'
+		} else if (type === 'WAVE' || type === 'AIFF' || type === 'MPEG' || type === 'MP3' || type === 'MIDI' ||
+			type === 'mp3') {
+			return 'music-color'
+		} else if (type === 'txt') {
+			return 'txt-color'
+		} else if (type === 'pdf') {
+			return 'pdf-color'
+		} else if (type === 'doc' || type === 'docx') {
+			return 'word-color'
+		} else if (type === 'ppt' || type === 'pptx') {
+			return 'ppt-color'
+		} else if (type === 'xls' || type === 'xlsx') {
+			return 'excel-color'
+		} else if (type === 'wps' || type === 'wpt') {
+			return 'word-color'
+		} else if (type === 'zip' || type === 'rar') {
+			return 'package-color'
+		} else {
+			return 'unknown-color'
+		}
+	}
+}
+
+function transformSize(limit) {
+	if (limit === '') {
+		return '-'
+	}
+	let size = ''
+	if (limit < 1 * 1024) {
+		size = limit.toFixed(2) + 'B'
+	} else if (limit < 1 * 1024 * 1024) {
+		size = (limit / 1024).toFixed(2) + 'KB'
+	} else if (limit < 1 * 1024 * 1024 * 1024) {
+		size = (limit / (1024 * 1024)).toFixed(2) + 'MB'
+	} else {
+		size = (limit / (1024 * 1024 * 1024)).toFixed(2) + 'GB'
+	}
+
+	let sizestr = size + ''
+	let len = sizestr.indexOf('.')
+	let dec = sizestr.substr(len + 1, 2)
+	if (dec === '00') {
+		return sizestr.substring(0, len) + sizestr.substr(len + 3, 2)
+	}
+	return sizestr
+}
+
+function transformTime(val) {
+	val = new Date(val)
+	if (val !== '' || undefined || null) {
+		return formatTime('yyyy-MM-dd HH:mm', val)
+	} else {
+		return '-'
+	}
+}
+
+function formatTime(fmt, val) {
+	let o = {
+		'M+': val.getMonth() + 1,
+		'd+': val.getDate(),
+		'h+': val.getHours() % 12 === 0 ? 12 : val.getHours() % 12,
+		'H+': val.getHours(),
+		'm+': val.getMinutes(),
+		's+': val.getSeconds(),
+		'q+': Math.floor((val.getMonth() + 3) / 3),
+		'S': val.getMilliseconds()
+	}
+	let week = {
+		'0': '日',
+		'1': '一',
+		'2': '二',
+		'3': '三',
+		'4': '四',
+		'5': '五',
+		'6': '六'
+	}
+	if (/(y+)/.test(fmt)) {
+		fmt = fmt.replace(RegExp.$1, (val.getFullYear() + '').substr(4 - RegExp.$1.length))
+	}
+	if (/(E+)/.test(fmt)) {
+		fmt = fmt.replace(RegExp.$1, ((RegExp.$1.length > 1) ? (RegExp.$1.length > 2 ? '星期' : '周') : '') + week[val
+			.getDay() + ''])
+	}
+	for (let k in o) {
+		if (new RegExp('(' + k + ')').test(fmt)) {
+			fmt = fmt.replace(RegExp.$1, (RegExp.$1.length === 1) ? (o[k]) : (('00' + o[k]).substr(('' + o[k]).length)))
+		}
+	}
+	return fmt
+}
+
 export default {
 	Decrypt,
 	Encrypt,
 	cloneDeep,
 	eventBus,
-	throttle
+	throttle,
+	getIcon,
+	transformSize,
+	transformTime
 }

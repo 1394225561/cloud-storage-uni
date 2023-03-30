@@ -2,7 +2,7 @@
 	<view class="login-container">
 		<text v-show="errorMsg" class="error-msg">{{errorMsg}}</text>
 		<view class="logo-container">
-			<icon-font icon="logo"></icon-font>
+			<icon-font class="logo-icon" icon="logo" :is-colourful="false"></icon-font>
 			<text class="brand-name">{{sysConfig.brandName}}</text>
 		</view>
 		<view class="form-container">
@@ -299,6 +299,10 @@
 			justify-content: center;
 			align-items: center;
 			border-bottom: 1px solid rgba(0, 0, 0, .1);
+
+			.logo-icon {
+				color: $cloud-theme-color;
+			}
 
 			.brand-name {
 				color: $cloud-theme-color;
