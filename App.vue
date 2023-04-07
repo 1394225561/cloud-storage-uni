@@ -21,8 +21,13 @@
 					this.$store.commit('SET_isSignedIn', false)
 				})
 			}).catch((error) => {
+				let type = Object.prototype.toString.call(error)
+				if (type === '[object Object]') {
+					error = JSON.stringify(error)
+				}
 				uni.$myRoute.router({
 					url: '/pages/error/error',
+					type: 'redirectTo',
 					params: {
 						error
 					}

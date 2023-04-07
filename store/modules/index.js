@@ -26,3 +26,7 @@ export {
 	default as transferList
 }
 from './transferList'
+export {
+	default as fileOperate
+}
+from './fileOperate'

@@ -20,10 +20,10 @@
 			console.log('onTabItemTap', args)
 		},
 		onPullDownRefresh(args) {
-			uni.$emit('refreshList')
+			uni.$emit(`${this.pageType}refreshList`)
 		},
 		onReachBottom(args) {
-			uni.$emit('loadMore')
+			uni.$emit(`${this.pageType}loadMore`)
 		}
 	}
 </script>

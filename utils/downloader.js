@@ -118,14 +118,14 @@ export class Downloader {
 	}
 
 	handlePath(path) {
-		console.log('path', path)
+		console.log('handleDownloadPath path', path)
 
 		// this.absoluteDownloadPath = plus.io.convertLocalFileSystemURL(path)
 		// console.log('this.absoluteDownloadPath', this.absoluteDownloadPath)
 
 		let prefixPath = plus.io.convertLocalFileSystemURL('_downloads').split('/0/Android/data')[0]
 		let array = path.split('/tree/primary:')
-		console.log('array', array)
+		console.log('handleDownloadPath array', array)
 		let relativePath = array[1]
 		let fullPath = `${prefixPath}/0/${relativePath}/`
 		this.setSavePath(fullPath)

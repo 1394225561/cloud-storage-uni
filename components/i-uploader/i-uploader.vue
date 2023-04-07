@@ -100,9 +100,9 @@
 					}
 				}
 				// 单次所有文件处理完以后 及时从缓存中清除选中的文件 防止继续选择文件出现异常
-				uni.$emit('clearFile')
+				uni.$emit(`${this.pageType}clearFile`)
 				// 修改标识位 允许选择新文件
-				uni.$emit('filesProcessingEnd')
+				uni.$emit(`${this.pageType}filesProcessingEnd`)
 			},
 			prepareUpload(currentUploadFile, index) {
 				return new Promise((resolve, reject) => {

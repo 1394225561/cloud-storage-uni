@@ -2,15 +2,20 @@
 	<view class="popup-content">
 		<view v-for="item in operates" :key="item.operate + pageType" class="operate-item" @tap="handleOperate(item)">
 			<view v-if="item.operate === 'upload'" class="operate-item__container">
+				<!-- 跨平台选择本地文件的插件 获取的文件用于传递给上传实例进行上传操作 -->
 				<lsj-upload :ref="uploaderRef" :childId="uploaderId" :width="width" :height="height" :option="option"
 					:size="maxUploadSize" :count="count" :formats="formats" :debug="debug" :instantly="instantly"
 					@change="onChange">
 					<view class="upload-btn" :style="{width: width,height: height}">
-						{{item.label}}
+						<icon-font class="operate-item-icon" :icon="item.iconClass" :is-colourful="false"></icon-font>
+						<text>
+							{{item.label}}
+						</text>
 					</view>
 				</lsj-upload>
 			</view>
 			<view v-else class="operate-item__container">
+				<icon-font class="operate-item-icon" :icon="item.iconClass" :is-colourful="false"></icon-font>
 				<text>
 					{{item.label}}
 				</text>
@@ -26,6 +31,10 @@
 			pageType: {
 				type: String,
 				default: 'personal'
+			},
+			fileId: {
+				type: String,
+				default: 'rootpath'
 			},
 			permissionType: {
 				type: Number,
@@ -68,16 +77,22 @@
 				let allOperates = [{
 						label: '新建文件夹',
 						operate: 'createDir',
+						permission: 'newFolder',
+						iconClass: 'folder-add',
 						permissionTypes: [4, 5]
 					},
 					{
 						label: '新建文档',
 						operate: 'createTxt',
+						permission: 'upload',
+						iconClass: 'file-text1',
 						permissionTypes: [2, 3, 4, 5]
 					},
 					{
 						label: '上传',
 						operate: 'upload',
+						permission: 'upload',
+						iconClass: 'upload',
 						permissionTypes: [2, 3, 4, 5]
 					}
 				]
@@ -86,7 +101,9 @@
 					operates = allOperates
 				} else {
 					if (this.fileId === 'rootpath') {
-						operates = [allOperates[0]]
+						operates = [allOperates[0]].filter((item) => {
+							return item.permissionTypes.indexOf(this.permissionType) !== -1
+						})
 					} else {
 						operates = allOperates.filter((item) => {
 							return item.permissionTypes.indexOf(this.permissionType) !== -1
@@ -100,16 +117,16 @@
 			}
 		},
 		mounted() {
-			uni.$on('clearFile', this.clear)
-			uni.$on('filesProcessingEnd', () => {
+			uni.$on(`${this.pageType}clearFile`, this.clear)
+			uni.$on(`${this.pageType}filesProcessingEnd`, () => {
+				// 文件处理（构建上传列表并判断是否能上传）结束
 				this.filesProcessing = false
-				console.log('修改 this.filesProcessing', this.filesProcessing)
 			})
 		},
 		beforeDestroy() {
-			console.log('beforeDestroy popup')
-			uni.$off('clearFile')
-			uni.$off('filesProcessingEnd')
+			console.log('beforeDestroy top opreate popup')
+			uni.$off(`${this.pageType}clearFile`)
+			uni.$off(`${this.pageType}filesProcessingEnd`)
 		},
 		methods: {
 			handleOperate(operate) {
@@ -170,16 +187,24 @@
 			height: 100%;
 
 			.operate-item__container {
+				color: #7f8389;
 				width: 100%;
 				height: 100%;
 				display: flex;
+				flex-direction: column;
 				justify-content: center;
 				align-items: center;
 
 				.upload-btn {
 					display: flex;
+					flex-direction: column;
 					justify-content: center;
 					align-items: center;
+				}
+
+				.operate-item-icon {
+					font-size: 48rpx;
+					margin-bottom: 10rpx;
 				}
 			}
 		}

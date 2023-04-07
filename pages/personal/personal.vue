@@ -64,10 +64,10 @@
 			}
 		},
 		onPullDownRefresh(args) {
-			uni.$emit('refreshList')
+			uni.$emit(`${this.pageType}refreshList`)
 		},
 		onReachBottom(args) {
-			uni.$emit('loadMore')
+			uni.$emit(`${this.pageType}loadMore`)
 		},
 		methods: {
 

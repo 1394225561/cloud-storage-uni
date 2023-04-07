@@ -32,7 +32,7 @@ export const request = function({
 	}
 
 	// app端设置请求头cookie
-	// #ifdef APP-PLUS
+	// #ifdef APP-PLUS || MP-WEIXIN
 	if (uni.$myUtils.loginPersistence.cookieValue) {
 		options.header['Cookie'] = uni.$myUtils.loginPersistence.cookieValue
 	}
@@ -118,7 +118,7 @@ export const request = function({
 
 function handleResult(data) {
 	// app端 保存cookie
-	// #ifdef APP-PLUS
+	// #ifdef APP-PLUS || MP-WEIXIN
 	if (data.cookies.length) {
 		let sessionCookie = data.cookies.filter((data) => {
 			return data.indexOf('SESSION=') !== -1

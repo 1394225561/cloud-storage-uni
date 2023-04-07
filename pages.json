@@ -93,7 +93,7 @@
 	"tabBar": {
 		"color": "#7f8389",
 		"selectedColor": "#E4393C",
-		"borderStyle": "#7f8389",
+		"borderStyle": "black",
 		"backgroundColor": "#fafafa",
 		"list": [{
 			"pagePath": "pages/personal/personal",
