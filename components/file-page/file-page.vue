@@ -24,7 +24,7 @@
 		<file-list :list-data="listData" :page-type="pageType" :file-id="listParam.fileId"
 			:is-selecting="isSelecting"></file-list>
 		<!-- 上拉加载更多 -->
-		<uni-load-more color="#007AFF" :status="status" :contentText='contentText' />
+		<uni-load-more color="#7f8389" :status="status" :contentText='contentText' />
 		<!-- 上传实例 非单例 各页面间独立存在 -->
 		<i-uploader :page-type="pageType" :dir-id="listParam.fileId" :dir-name="listParam.fileName"
 			:file-category="fileCategory" :option="option"></i-uploader>
@@ -40,8 +40,12 @@
 					</view>
 					{{ isSelectedAll ? '取消全选' : '全选' }}
 				</view>
+				<view class="select-popup__cancel" @click="clickRightText">
+					<icon-font class="select-popup__cancel__icon" icon="close-circle-o"
+						:is-colourful="false"></icon-font>
+				</view>
 				<text class="select-popup__text">
-					{{ `已选择${currentRelated.data.selectedDatas.length}个文件` }}
+					{{ `已选择 ${currentRelated.data.selectedDatas.length} 个文件` }}
 				</text>
 			</view>
 			<!-- 多文件操作bar -->
@@ -417,6 +421,7 @@
 				font-size: 12px;
 				border-top: 1px solid rgba(127, 131, 137, .5);
 				border-bottom: 1px solid rgba(127, 131, 137, .5);
+				position: relative;
 
 				.select-popup__select {
 					flex: 1;
@@ -453,6 +458,23 @@
 						.check-box-active {
 							background-color: $cloud-theme-color;
 						}
+					}
+				}
+
+				.select-popup__cancel {
+					width: 50px;
+					height: 100%;
+					position: absolute;
+					left: 50%;
+					transform: translateX(-50%);
+					z-index: 1;
+					display: flex;
+					justify-content: center;
+					align-items: center;
+					color: #7f8389;
+
+					.select-popup__cancel__icon {
+						font-size: 36rpx;
 					}
 				}
 
