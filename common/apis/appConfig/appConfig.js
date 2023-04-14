@@ -9,3 +9,9 @@ export const getPermissionBtn = {
 	path: '/api/menu/pagePermissions',
 	method: 'get'
 }
+// 租户系统配置
+export const tenantConfig = {
+	app: 'cloudStorage',
+	path: '/api/v2/defaultConfig/tenant/get',
+	method: 'get'
+}

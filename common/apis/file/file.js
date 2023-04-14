@@ -53,3 +53,15 @@ export const canBeUploadType = {
 	method: 'post',
 	dataType: 'json'
 }
+// 继续涉敏文件上传列表
+export const keepOnUpload = {
+	path: '/api/v2/file/keepOnUpload',
+	app: 'cloudStorage',
+	method: 'get'
+}
+// 放弃涉敏文件上传列表
+export const giveUpUpload = {
+	path: '/api/v2/file/giveUpUpload',
+	app: 'cloudStorage',
+	method: 'get'
+}

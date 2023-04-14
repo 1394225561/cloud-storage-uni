@@ -116,7 +116,7 @@
 						}
 					} else {
 						// 都取消了勾选
-						console.log('选中0个')
+						// console.log('选中0个')
 					}
 				},
 				deep: true

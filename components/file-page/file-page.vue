@@ -201,7 +201,7 @@
 		watch: {
 			listParam: {
 				handler(newValue) {
-					console.log('listParam newValue', newValue)
+					// console.log('listParam newValue', newValue)
 				},
 				deep: true
 			},
@@ -226,13 +226,11 @@
 			// this.refreshList()
 		},
 		beforeMount() {
-			console.log('beforeMount')
 			uni.$on(`${this.pageType}refreshList`, this.refreshList) // 下拉刷新
 			uni.$on(`${this.pageType}loadMore`, this.loadMore) // 上拉加载更多
 			uni.$on(`${this.pageType}updateFiles`, this.updateFiles) // 文件目录层级变化更新文件列表
 		},
 		beforeDestroy() {
-			console.log('beforeDestroy')
 			uni.$off(`${this.pageType}refreshList`)
 			uni.$off(`${this.pageType}loadMore`)
 			uni.$off(`${this.pageType}updateFiles`)
@@ -307,7 +305,7 @@
 						api: targetApi,
 						params: this.listParam
 					}).then((res) => {
-						console.log('getListData ' + this.pageType + ' =======>', res)
+						// console.log('getListData ' + this.pageType + ' =======>', res)
 						let data = res.data
 						if (!isLoadMore) {
 							this.listData = data.content
@@ -317,7 +315,7 @@
 						this.permissionType = data.permissionType || -1
 						resolve(data)
 					}).catch((error) => {
-						console.log('getListData error' + this.pageType + ' =======>', error)
+						// console.log('getListData error' + this.pageType + ' =======>', error)
 					})
 				})
 			},
@@ -345,7 +343,7 @@
 				this.listParam.page++
 				this.status = this.statusOptions[1]
 				this.getListData(true).then((newData) => {
-					console.log('loadMore newData' + this.pageType + ' =======>', newData)
+					// console.log('loadMore newData' + this.pageType + ' =======>', newData)
 					this.listData = this.listData.concat(newData.content)
 					// 当上拉加载更多的时候 不需要清空vuex数据 但是需要将全选标识符改为false
 					this.$store.commit(this.currentRelated.unselectAllMethodName)

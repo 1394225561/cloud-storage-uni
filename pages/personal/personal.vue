@@ -27,10 +27,13 @@
 					if (newValue) {
 						this.$nextTick(() => {
 							// 登录状态下 再初始化应用数据
+							this.$store.dispatch('dictGroupGet')
 							this.$store.dispatch('getTenantInfo')
+							this.$store.dispatch('getTenantConfig')
 							this.$store.dispatch('getPermissionBtns')
 							this.$store.dispatch('getCanBeUploadType')
 							this.$refs.filePage.refreshList()
+							// this.$store.dispatch('getUnProcessList')
 						})
 					}
 				},

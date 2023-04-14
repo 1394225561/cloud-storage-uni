@@ -10,21 +10,17 @@ const transferList = {
 	 * 初始化state
 	 */
 	state: {
-		// 本次上传的文件列表
+		// 本次上传的文件列表（由前端上传实例构建）
 		uploaderList: [],
+		// 通过轮询 检查出的涉敏文件（需要从uploaderList中剔除）
+		sensitiveFileIds: [],
 		// 等待手工处理的文件列表(涉敏文件)
 		waitFileList: [],
-		// 等待后端处理的文件列表
+		// 等待后端处理的文件列表（审核中，状态未知的文件）
 		unProcessList: [],
 		canBeUploadTypeData: [],
 		// 本次下载的文件列表
-		downloadFileList: [],
-		// 上传组件实例集合
-		uploaderInstanceCollections: {},
-		selected: {
-			personal: [],
-			share: []
-		}
+		downloadFileList: []
 	},
 
 	/**
@@ -32,16 +28,13 @@ const transferList = {
 	 */
 	getters: {
 		uploaderList: state => state.uploaderList,
+		sensitiveFileIds: state => state.sensitiveFileIds,
 		waitFileList: state => state.waitFileList,
 		unProcessList: state => state.unProcessList,
 		canBeUploadTypeData: state => state.canBeUploadTypeData,
 		downloadFileList(state) {
 			return state.downloadFileList
-		},
-		uploaderInstanceCollections(state) {
-			return state.uploaderInstanceCollections
-		},
-		selected: state => state.selected,
+		}
 	},
 
 	/**
@@ -53,6 +46,9 @@ const transferList = {
 			let result = utils.cloneDeep(file)
 			state.uploaderList.unshift(result)
 			console.log('SET_uploaderList', state.uploaderList)
+		},
+		SET_sensitiveFileIds: (state, payload) => {
+			state.sensitiveFileIds.push(payload)
 		},
 		SET_waitFileList: (state, payload) => {
 			state.waitFileList = payload
@@ -79,20 +75,9 @@ const transferList = {
 		},
 		APPEND_DOWNLOAD_FILE_LIST(state, payload) {
 			state.downloadFileList = [
-				...state.downloadFileList,
-				...payload
+				...payload,
+				...state.downloadFileList
 			]
-		},
-		SET_UPLOADER_INSTANCE_COLLECTIONS(state, payload) {
-			const {
-				key,
-				instance
-			} = payload
-			state.uploaderInstanceCollections[key] = instance
-		},
-		setSelected(state, payload) {
-			let key = payload.pageType
-			state.selected[key] = payload.selected
 		}
 	},
 	/**
@@ -105,9 +90,11 @@ const transferList = {
 			state
 		}) {
 			return new Promise((resolve, reject) => {
-				uni.$myUtils.request(keywordList, {}, (response) => {
-					commit('SET_waitFileList', response)
-					resolve(response)
+				uni.$myUtils.request({
+					api: keywordList
+				}).then((response) => {
+					commit('SET_waitFileList', response.data)
+					resolve(response.data)
 				}).catch(error => {
 					reject(error)
 				})
@@ -133,9 +120,11 @@ const transferList = {
 			state
 		}) {
 			return new Promise((resolve, reject) => {
-				uni.$myUtils.request(unProcessList, {}, (response) => {
-					commit('SET_unProcessList', response)
-					resolve(response)
+				uni.$myUtils.request({
+					api: unProcessList
+				}).then((response) => {
+					commit('SET_unProcessList', response.data)
+					resolve(response.data)
 				}).catch(error => {
 					reject(error)
 				})
@@ -155,11 +144,6 @@ const transferList = {
 			commit
 		}, payload) {
 			commit('APPEND_DOWNLOAD_FILE_LIST', payload)
-		},
-		setUploaderInstances({
-			commit
-		}, payload) {
-			commit('SET_UPLOADER_INSTANCE_COLLECTIONS', payload)
 		}
 	}
 }

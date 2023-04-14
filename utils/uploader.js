@@ -26,7 +26,7 @@ import utils from './utils.js'
 		 dirId, 上传到的目标文件夹
 		 dirName, 
 		 state, 等待中
-		 stateCode, waiting success error intercept
+		 stateCode, waiting uploading processing success error intercept
 		 stateText, 具体的状态文描
 		 uploadType, 是否是上传新版本 'newVersion' 'personalFile'
 		 uploadNewId, 上传新版本时 目标文件id
@@ -68,6 +68,7 @@ export class Uploader {
 		this.maxUploadSize = maxUploadSize
 		this.header = header
 		this.formData = formData
+		this.uploadDetectionTimer = null
 		// #ifdef H5
 		this.onProgressH5 = utils.throttle(this.onprogress)
 		// #endif
@@ -93,6 +94,7 @@ export class Uploader {
 			file,
 			path,
 			name,
+			fileName: name,
 			size,
 			chunk: 0,
 			fileCategory,
@@ -103,7 +105,8 @@ export class Uploader {
 			isUploadingNew,
 			state: '等待中',
 			stateCode: 'waiting',
-			stateText: '文件等待上传'
+			stateText: '文件等待上传',
+			time: new Date().getTime()
 		}
 		this.checkChunks(fileObj)
 		return fileObj
@@ -234,7 +237,7 @@ export class Uploader {
 			}
 			let chunkBlob = blob.slice(start, end) // 获取切片blob
 			let addFileResult = await this.addFile(file, chunkBlob).then(res => {
-				console.log('addFile 单次请求 成功 res', res)
+				// console.log('addFile 单次请求 成功 res', res)
 				start = end
 				file.chunk++
 				result = {
@@ -243,7 +246,7 @@ export class Uploader {
 				}
 				return result
 			}).catch((error) => {
-				console.log('addFile 单次请求 失败 error', error)
+				// console.log('addFile 单次请求 失败 error', error)
 				result = {
 					state: 'fail',
 					response: error
@@ -332,30 +335,53 @@ export class Uploader {
 		})
 	}
 	onprogress(file) {
-		console.log('onprogress file.progress', file.progress, file.progress, file.progress)
+		// console.log('onprogress file.progress', file.progress, file.progress, file.progress)
+		uni.$myStore.commit('SET_fileState', {
+			id: file.id,
+			stateCode: 'uploading',
+			state: file.progress + '%',
+			stateText: '文件上传中...'
+		})
 	}
 	// 暂停
 	pauseUpload() {}
 	// 继续
 	resumeUpload() {}
+	startUploadDetectionTimer(cb) {
+		if (this.uploadDetectionTimer === null) {
+			this.uploadDetectionTimer = setInterval(this.intervalFun(cb), 5000)
+		}
+	}
+	intervalFun(cb) {
+		cb()
+		return cb
+	}
+	clearUploadDetectionTimer() {
+		if (this.uploadDetectionTimer !== null) {
+			clearInterval(this.uploadDetectionTimer)
+			this.uploadDetectionTimer = null
+		}
+	}
 	// 轮询上传后的文件状态 是否涉敏涉密
 	checkFileStatus() {}
 	// 上传成功
 	uploadSuccess(cb, response) {
-		console.log('~~~~~~~~~~~~~~~ uploadSuccess', response)
-		console.log(cb)
+		// console.log('~~~~~~~~~~~~~~~ uploadSuccess', response)
+		if (cb) {
+			this.startUploadDetectionTimer(cb)
+		}
 	}
 	// 上传失败
 	uploadFail(cb, error) {
-		console.log('!!!!!!!!!!!!!!! uploadFail', error)
-		console.log(cb)
+		// console.log('!!!!!!!!!!!!!!! uploadFail', error)
 	}
 	// 上传完成
-	uploadComplete(result) {
+	uploadComplete(cb, result) {
 		if (result.state === "complete") {
-			this.uploadSuccess(undefined, result)
+			// cb为外部传入的文件审核状态轮询函数
+			this.uploadSuccess(cb, result)
 		} else {
-			this.uploadFail(undefined, result)
+			this.uploadFail(cb, result)
 		}
 	}
 }

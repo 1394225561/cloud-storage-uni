@@ -1,6 +1,7 @@
 import {
 	sysConfig,
-	getPermissionBtn
+	getPermissionBtn,
+	tenantConfig
 } from '@/common/apis/appConfig/appConfig.js'
 import {
 	getTenantInfo,
@@ -20,7 +21,8 @@ const app = {
 		tenantInfo: {},
 		dictGroup: {},
 		dictSwitchGroup: {},
-		isSignedIn: false
+		isSignedIn: false,
+		isUploadDetection: true
 	},
 	getters: {
 		/**
@@ -48,6 +50,9 @@ const app = {
 		},
 		isSignedIn(state) {
 			return state.isSignedIn
+		},
+		isUploadDetection(state) {
+			return state.isUploadDetection
 		}
 	},
 	mutations: {
@@ -73,6 +78,9 @@ const app = {
 		},
 		SET_isSignedIn(state, payload) {
 			state.isSignedIn = payload
+		},
+		SET_isUploadDetection(state, payload) {
+			state.isUploadDetection = payload
 		}
 	},
 	actions: {
@@ -95,7 +103,9 @@ const app = {
 			commit
 		}, payload = []) {
 			return new Promise((resolve, reject) => {
-				uni.$myUtils.request(tenantConfig).then(res => {
+				uni.$myUtils.request({
+					api: tenantConfig
+				}).then(res => {
 					commit('SET_TENANTCONFIG', res.data)
 					resolve(res.data)
 				}).catch(error => {
@@ -139,18 +149,31 @@ const app = {
 			commit
 		}, payload = []) {
 			return new Promise((resolve, reject) => {
-				uni.$myUtils.request(dictGroupGet, {
-					group: 'popup-template'
+				uni.$myUtils.request({
+					api: dictGroupGet,
+					params: {
+						group: 'popup-template'
+					}
 				}).then(res => {
 					commit('SET_DICTGROUP', res.data)
 					resolve()
 				}).catch(error => {
 					reject(error)
 				})
-				uni.$myUtils.request(dictGroupGet, {
-					group: 'module-switch'
+				uni.$myUtils.request({
+					api: dictGroupGet,
+					params: {
+						group: 'module-switch'
+					}
 				}).then(res => {
 					commit('SET_DICTSWITCHGROUP', res.data)
+					// 是否开启文件上传检测
+					if (res.data.keywords === 'off' || (res.data.keywords === 'on' && res.data[
+							'keywords-check-side'] === 'download')) {
+						commit('SET_isUploadDetection', false)
+					} else {
+						commit('SET_isUploadDetection', true)
+					}
 					resolve()
 				}).catch(error => {
 					reject(error)
