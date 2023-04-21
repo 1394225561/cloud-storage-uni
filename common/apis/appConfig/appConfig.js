@@ -15,3 +15,8 @@ export const tenantConfig = {
 	path: '/api/v2/defaultConfig/tenant/get',
 	method: 'get'
 }
+export const getAppVersion = {
+	app: 'cloudStorage',
+	path: '/api/clientVersion/get',
+	method: 'get'
+}

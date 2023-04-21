@@ -2,6 +2,9 @@
 	import {
 		mapGetters
 	} from 'vuex'
+	import {
+		checkVersion
+	} from '@/utils/check-version.js'
 
 	export default {
 		computed: {
@@ -36,6 +39,9 @@
 		},
 		onShow: function() {
 			console.log('App Show')
+			// #ifdef APP-PLUS
+			checkVersion()
+			// #endif
 		},
 		onHide: function() {
 			console.log('App Hide')
@@ -48,6 +54,7 @@
 	@import '@/common/styles/styles.scss';
 	@import '@/uni_modules/uni-scss/index.scss';
 	@import '@/static/iconfont/iconfont-weapp-icon.css';
+	@import url("/components/gaoyia-parse/parse.css");
 
 	/* #ifndef APP-NVUE */
 	@import '@/static/customicons.css';

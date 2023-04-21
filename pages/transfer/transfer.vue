@@ -6,7 +6,8 @@
 		<uni-nav-bar :title="navbarTitle" backgroundColor="#44474d" fixed="true" statusBar="true" color="#ffffff"
 			:height="50" :leftWidth="70" :rightWidth="70">
 			<view class="clear-float navbar-text-container" slot="right">
-				<text v-show="tableList.length" class="right-text" @tap="clickRightText">{{ rightText }}</text>
+				<text v-show="tableList.length && current !== 2" class="right-text"
+					@tap="clickRightText">{{ rightText }}</text>
 			</view>
 		</uni-nav-bar>
 		<!-- 公告栏 -->
@@ -16,8 +17,8 @@
 			@clickItem="onClickTabItem" />
 		<!-- 列表 -->
 		<uni-list class="list-container">
-			<uni-list-item direction="column" v-for="(data, index) in tableList" :key="data.id || data.fileId"
-				:clickable="false" :title="data.fileName">
+			<uni-list-item direction="column" v-for="(data, index) in tableList"
+				:key="data.guid || data.id || data.fileId" :clickable="false" :title="data.fileName">
 				<template v-slot:body>
 					<!-- 文件信息展示 -->
 					<view class="body-container">
@@ -35,7 +36,7 @@
 								<span class="file-name">{{ data.fileName }}</span>
 								<span class="file-time">{{ transformTime(data.time || data.gmtModified) }}</span>
 							</view>
-							<view v-if="data.size || data.length" class="content-right">
+							<view class="content-right">
 								<span class="file-size">{{ transformSize(data.size || data.length) }}</span>
 							</view>
 						</view>
@@ -69,6 +70,10 @@
 							v-show="data.handleResult === undefined && (data.stateCode === 'error' || data.stateCode === 'intercept') && data.stateText"
 							class="operation-bar-container">
 							{{ data.stateText }}
+						</view>
+						<!-- app端文件下载成功后的本地路径 -->
+						<view v-show="data.savePath" class="operation-bar-container">
+							{{ data.savePath }}
 						</view>
 					</view>
 				</template>
@@ -479,11 +484,18 @@
 
 			.operation-bar-container {
 				height: 50rpx;
-				width: 100%;
+				max-width: 100%;
 				background-color: #fafafa;
 				text-align: center;
 				line-height: 50rpx;
 				font-size: 24rpx;
+				overflow-x: auto;
+				padding: 0 24rpx;
+				white-space: nowrap;
+
+				&::-webkit-scrollbar {
+					display: none;
+				}
 			}
 
 			::v-deep .uni-list-item__container {

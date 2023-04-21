@@ -68,7 +68,18 @@ const transferList = {
 			console.log('SET_fileState', state.uploaderList)
 		},
 		SET_DOWNLOAD_FILE_LIST(state, payload) {
-			state.downloadFileList = payload
+			// 深拷贝 防止修改vuex数据导致外部数据异常
+			let file = utils.cloneDeep(payload)
+			state.downloadFileList.unshift(file)
+			console.log('SET_DOWNLOAD_FILE_LIST', state.downloadFileList)
+		},
+		SET_DOWNLOAD_fileState: (state, payload) => {
+			for (let i in state.downloadFileList) {
+				if (state.downloadFileList[i].guid === payload.guid) {
+					state.downloadFileList.splice(i, 1, Object.assign({}, state.downloadFileList[i], payload))
+				}
+			}
+			console.log('SET_DOWNLOAD_fileState', state.downloadFileList)
 		},
 		CLEAR_DOWNLOAD_FILE_LIST(state, payload) {
 			state.downloadFileList = []

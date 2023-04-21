@@ -158,6 +158,7 @@ export function showErrorMsg(data) {
 	let msg = data.errorMessage || data.message || '请求异常！'
 	uni.showToast({
 		title: msg,
+		icon: "error",
 		duration: 2000
 	})
 }
@@ -169,6 +170,7 @@ export function showSuccessMsg(msg = '成功！') {
 }
 
 export function toLogin() {
+	uni.$myStore.commit('SET_isSignedIn', false)
 	uni.$myRoute.router({
 		url: uni.$myUtils.config.loginPath,
 		type: 'redirectTo'

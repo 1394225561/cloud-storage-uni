@@ -107,7 +107,7 @@ const lookLast = {
 const shareAgain = {
 	toolTip: '再次分享',
 	id: 'shareAgain',
-	event: 'share',
+	event: 'shareAgain',
 	iconClass: 'share',
 	sort: 1
 }
@@ -123,7 +123,7 @@ const restore = {
 const cancelShare = {
 	toolTip: '取消分享',
 	id: 'cancelShare',
-	event: 'cancel',
+	event: 'cancelShare',
 	iconClass: 'quit',
 	sort: 1
 }

@@ -12,7 +12,8 @@ const whiteList = [
 	"/pages/share/share",
 	"/pages/transfer/transfer",
 	"/pages/profile/profile",
-	"/pages/error/error"
+	"/pages/error/error",
+	"/pages/preview/preview"
 ]
 
 const handleOverwirteRoute = () => {

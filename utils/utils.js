@@ -65,6 +65,12 @@ function throttle(func, delay = 1000) {
 	}
 }
 
+function getFileType(fileName) {
+	const point = fileName.lastIndexOf('.')
+	const type = fileName.substring(point + 1).toLowerCase()
+	return type
+}
+
 function getIcon(data, typeFlag = 0) {
 	let fileName = data.fileName
 	if (typeFlag === 2 && data.isDir) {
@@ -74,8 +80,7 @@ function getIcon(data, typeFlag = 0) {
 		return 'folder-color'
 	}
 	if (fileName !== '' || fileName !== undefined) {
-		let point = fileName.lastIndexOf('.')
-		let type = fileName.substring(point + 1).toLowerCase()
+		const type = getFileType(fileName)
 		if (type === 'jpg' || type === 'gif' || type === 'png' || type === 'jpeg' || type === 'bmp') {
 			return 'picture-color'
 		} else if (type === 'avi' || type === 'rmvb' || type === 'rm' || type === 'asf' || type === 'divx' || type ===
@@ -106,8 +111,8 @@ function getIcon(data, typeFlag = 0) {
 }
 
 function transformSize(limit) {
-	if (limit === '') {
-		return '-'
+	if (limit === '' || !limit) {
+		return '--'
 	}
 	let size = ''
 	if (limit < 1 * 1024) {
@@ -173,13 +178,71 @@ function formatTime(fmt, val) {
 	return fmt
 }
 
+function showModal({
+	title = '提示',
+	content = '',
+	showCancel = true,
+	cancelText = '取消',
+	cancelColor = '#7f8389',
+	confirmText = '确定',
+	confirmColor = '#E4393C',
+	editable = false,
+	placeholderText = '',
+	success,
+	fail,
+	complete
+}) {
+	uni.showModal({
+		title,
+		content,
+		showCancel,
+		cancelText,
+		cancelColor,
+		confirmText,
+		confirmColor,
+		editable,
+		placeholderText,
+		success,
+		fail,
+		complete
+	})
+}
+
+function checkSpecialCharacters(value) {
+	let pattern = /[\|,/<,/>,\*,\?,\,,\/,\\,\[,\]]/
+	if (pattern.test(value)) {
+		return {
+			pass: false,
+			message: '文件名不能包含以下字符: <,>,|,*,?,/,\\,[]'
+		}
+	} else {
+		return {
+			pass: true
+		}
+	}
+}
+
+function checkPermission(value) {
+	let permissionBtn = uni.getStorageSync('permissionBtns')
+	if (!permissionBtn) {
+		return false
+	} else {
+		permissionBtn = permissionBtn.split(uni.$myUtils.config.splitCharacter)
+		return permissionBtn.indexOf(value) !== -1
+	}
+}
+
 export default {
 	Decrypt,
 	Encrypt,
 	cloneDeep,
 	eventBus,
 	throttle,
+	getFileType,
 	getIcon,
 	transformSize,
-	transformTime
+	transformTime,
+	showModal,
+	checkSpecialCharacters,
+	checkPermission
 }

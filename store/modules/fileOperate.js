@@ -10,7 +10,12 @@ const fileOperate = {
 			selectedDatas: [],
 			isSelectedAll: false
 		},
-		currentOperatePopupCloseMethodName: ''
+		currentOperatePopupCloseMethodName: '',
+		currentPreview: {
+			type: '',
+			src: '',
+			file: {}
+		}
 	},
 	getters: {
 		/**
@@ -26,6 +31,9 @@ const fileOperate = {
 		},
 		currentOperatePopupCloseMethodName(state) {
 			return state.currentOperatePopupCloseMethodName
+		},
+		currentPreview(state) {
+			return state.currentPreview
 		}
 	},
 	mutations: {
@@ -85,6 +93,9 @@ const fileOperate = {
 		},
 		resetShare(state, payload) {
 			state.shareRelated.selectedDatas = []
+		},
+		setCurrentPreview(state, payload) {
+			state.currentPreview = payload
 		}
 	},
 	actions: {

@@ -25,6 +25,8 @@
 </template>
 
 <script>
+	import utils from '@/utils/utils.js'
+
 	export default {
 		name: "operate-popup",
 		props: {
@@ -62,7 +64,7 @@
 				files: new Map(),
 				// 是否打印日志
 				debug: true,
-				filesProcessing: false,
+				filesProcessing: false
 			}
 		},
 		computed: {
@@ -124,37 +126,39 @@
 			})
 		},
 		beforeDestroy() {
-			console.log('beforeDestroy top opreate popup')
+			// console.log('beforeDestroy top opreate popup')
 			uni.$off(`${this.pageType}clearFile`)
 			uni.$off(`${this.pageType}filesProcessingEnd`)
 		},
 		methods: {
 			handleOperate(operate) {
 				this[operate.operate]()
+				if (operate.operate !== 'upload') {
+					this.$emit('closeTopPopup')
+				}
 			},
 			createDir() {
-				console.log('createDir')
+				this.$emit('createDir')
 			},
 			createTxt() {
-				console.log('createTxt')
+				this.$emit('createTxt')
 			},
-			upload() {
-				console.log('upload')
-			},
+			upload() {},
 			// 文件选择回调
 			onChange(files) {
 				// clear() 清除文件缓存Map的操作也会调用onChange
-				console.log('当前选择的文件列表：', JSON.stringify([...files.values()]));
+				// console.log('当前选择的文件列表：', JSON.stringify([...files.values()]))
 				let currentFiles = [...files.values()]
+				console.log('当前选择的文件列表：', currentFiles)
 				if (this.filesProcessing) {
 					// 如果选择的文件还在处理中 
 					if (currentFiles.length) {
 						// 选择了新文件 需要提示并清空
-						console.log('文件上传处理中，请稍后重试')
+						// console.log('文件上传处理中，请稍后重试')
 						this.clear()
 					} else {
 						// 此时为触发了clear()
-						console.log('文件数量为0')
+						// console.log('文件数量为0')
 					}
 					return
 				}

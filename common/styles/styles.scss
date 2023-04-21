@@ -7,3 +7,10 @@ $cloud-theme-color: #E4393C;
  	clear: both;
  	visibility: hidden;
  }
+ 
+ uni-button{
+	 margin: unset;
+ }
+ uni-button[type=warn] {
+	 background-color: $cloud-theme-color;
+ }

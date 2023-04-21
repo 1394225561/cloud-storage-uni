@@ -8,7 +8,10 @@
 			:title="data.fileName + ''">
 			<template v-slot:body>
 				<!-- 文件信息展示 -->
-				<view class="body-container">
+				<view v-if="data.createDir" class="body-container">
+					<create-dir :data='data' :page-type="pageType" :file-id="fileId"></create-dir>
+				</view>
+				<view v-else class="body-container">
 					<view v-show="isSelecting" class="check-box-container" @click="handleCheck(data)">
 						<view :class="['check-box', judgeActive(data) ? 'check-box-active-border' : '']">
 							<view :class="['check-box-checked', judgeActive(data) ? 'check-box-active' : '']">
@@ -23,7 +26,7 @@
 							<span class="file-name">{{ data.fileName }}</span>
 							<span class="file-time">{{ transformTime(data.gmtModified) }}</span>
 						</view>
-						<view v-if="data.length" class="content-right">
+						<view class="content-right">
 							<span class="file-size">{{ transformSize(data.length) }}</span>
 						</view>
 					</view>
@@ -32,7 +35,7 @@
 					</view>
 				</view>
 			</template>
-			<template v-slot:footer>
+			<template v-if="!data.createDir" v-slot:footer>
 				<!-- 单文件操作bar -->
 				<view v-show="data.showOperationBar" class="operation-bar-container">
 					<operate-bar :page-type="pageType" :file-data="data" :file-id="fileId"
@@ -44,13 +47,11 @@
 </template>
 
 <script>
-	import {
-		downloadSingle
-	} from '@/common/apis/file/file.js'
 	import utils from '@/utils/utils.js'
 	import {
 		mapGetters
 	} from 'vuex'
+	import preview from '@/utils/preview.js'
 
 	export default {
 		name: "file-list",
@@ -73,7 +74,16 @@
 			}
 		},
 		computed: {
-			...mapGetters(['personalRelated', 'shareRelated']),
+			...mapGetters(['personalRelated', 'shareRelated', 'sysConfig', 'dictGroup']),
+			secretText() {
+				return this.dictGroup.outNetSecret
+			},
+			sensitiveText() {
+				return this.dictGroup.outNetSensitive
+			},
+			downloadCheck() {
+				return this.sysConfig.business.downloadCheck
+			},
 			currentRelated() {
 				let related = {}
 				switch (this.pageType) {
@@ -177,19 +187,15 @@
 					this.$refs.breadCrumb.crumbPush(param)
 				} else {
 					// 预览
-					console.log('preview')
+					preview.preview({
+						file: data,
+						fileList: this.listData,
+						downloadCheck: this.downloadCheck,
+						secretText: this.secretText,
+						sensitiveText: this.sensitiveText,
+						pageType: this.pageType
+					})
 				}
-			},
-			downloadFile(file) {
-				let requestPath = downloadSingle.path + '?fileId=' + file.id
-				// #ifdef APP-PLUS
-				let downloadItem = uni.$myUtils.downloader.createDownloadItem(file)
-				uni.$myUtils.downloader.downloadFile(downloadItem, requestPath)
-				// #endif
-
-				// #ifdef H5
-				uni.$myUtils.downloader.downloadFile(file, requestPath)
-				// #endif
 			}
 		}
 	}
@@ -214,6 +220,10 @@
 			top: calc(var(--status-bar-height) + 50px);
 			white-space: nowrap;
 			overflow-x: auto;
+
+			&::-webkit-scrollbar {
+				display: none;
+			}
 		}
 
 		.body-container {

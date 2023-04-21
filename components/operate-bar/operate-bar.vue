@@ -31,6 +31,7 @@
 	import {
 		mapGetters
 	} from 'vuex'
+	import utils from '@/utils/utils.js'
 
 	export default {
 		name: "operate-bar",
@@ -77,7 +78,7 @@
 				}
 			},
 			...mapGetters([
-				'tenantInfo', 'details', 'personalRelated', 'shareRelated'
+				'tenantInfo', 'details', 'personalRelated', 'shareRelated', 'sysConfig', 'dictGroup'
 			]),
 			currentRelated() {
 				let related = {}
@@ -97,6 +98,15 @@
 				// 拼接id 确保每个operate-bar都有唯一的关闭popup方法名
 				let name = `closeOperatePopup${this.fileData.id || 'batchBar'}${this.pageType}`
 				return name
+			},
+			downloadCheck() {
+				return this.sysConfig.business.downloadCheck
+			},
+			secretText() {
+				return this.dictGroup.outNetSecret
+			},
+			sensitiveText() {
+				return this.dictGroup.outNetSensitive
 			}
 		},
 		watch: {
@@ -114,13 +124,14 @@
 				action: [],
 				actionPopupIsShow: false,
 				sharLink: null,
-				type: null
+				type: null,
+				downloadNeedCheckText: '您选择的文件未经保密检测，不能在外网预览或下载。是否现在进行保密检测？',
+				multipledownloadCheckUnsafeText: '您选择的文件中包含未经保密检测的文件，请选择单个文件进行下载！'
 			}
 		},
 		created() {
 			if (this.isSingle) {
-				let point = this.fileData.fileName.lastIndexOf('.')
-				this.type = this.fileData.fileName.substring(point + 1).toLowerCase()
+				this.type = utils.getFileType(this.fileData.fileName)
 				this.sharLink = uni.$myUtils.config.baseUrl.cloudStorage + (this.fileData.shareUrl || '')
 				// console.log('this.sharLink', this.sharLink)
 			}
@@ -187,21 +198,19 @@
 				}
 				// 如果启用了TTS,且文件格式为txt或word,那么更多里面加入读一读功能
 				if (this.isEnableTts) {
+					// #ifdef H5
+					return
+					// #endif
 					let readOption = {
 						toolTip: '读一读(支持word,txt)',
 						event: 'readFile',
 						iconClass: '',
 						sort: 99
 					}
-					// #ifdef H5
-					return
-					// #endif
 					if (this.type === 'txt' || this.type === 'doc' || this.type === 'docx') {
 						this.action.push({
-							name: readOption.toolTip,
-							method: () => {
-								this.handleEvent(readOption.event, readOption)
-							}
+							id: 'readFile',
+							...readOption
 						})
 					}
 				}
@@ -210,11 +219,57 @@
 				if (isFromMoreAction) {
 					this.closeOperatePopup()
 				}
-				let data = this.isSingle ? this.fileData : this.currentRelated.data.selectedDatas
-				console.log('eventType', eventType)
-				console.log('item', item)
-				console.log('data', data)
-			}
+				const data = this.isSingle ? [this.fileData] : this.currentRelated.data.selectedDatas
+				const type = Object.prototype.toString.call(eventType)
+				let methodName
+				if (type === '[object Array]') {
+					// const methodNames = [`${eventType[0]}Event`, `${eventType[1]}Event`]
+					switch (item.id) {
+						case 'collect':
+							methodName = 'lockEvent'
+							break
+						case 'lock':
+							methodName = 'favoriteEvent'
+							break
+						default:
+							break
+					}
+				} else {
+					methodName = `${eventType}Event`
+				}
+				if (eventType) {
+					this[methodName](data, item)
+				}
+			},
+			lockEvent() {},
+			favoriteEvent() {},
+			shareEvent() {},
+			editEvent() {},
+			downloadEvent(files, eventItem) {
+				console.log('files', files)
+				console.log('eventItem', eventItem)
+				uni.$myUtils.downloader.downloadEvent({
+					files,
+					pageType: this.pageType,
+					downloadCheck: this.downloadCheck,
+					secretText: this.secretText,
+					sensitiveText: this.sensitiveText
+				})
+			},
+			deleteEvent() {},
+			moveEvent() {},
+			copyEvent() {},
+			renameEvent() {},
+			setShareEvent() {},
+			settingSharedEvent() {},
+			uploaderNewEvent() {},
+			lookLastEvent() {},
+			shareAgainEvent() {},
+			restoreEvent() {},
+			cancelShareEvent() {},
+			copyLinkEvent() {},
+			move2publicEvent() {},
+			copy2publicEvent() {},
 		}
 	}
 </script>

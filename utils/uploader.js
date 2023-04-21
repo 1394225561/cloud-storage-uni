@@ -125,7 +125,8 @@ export class Uploader {
 		// 直接标记为取消
 		const fileName = file.name
 		const canBeUploadTypeData = uni.$myStore.getters.canBeUploadTypeData
-		const suffix = fileName.substring(fileName.lastIndexOf('.') + 1, fileName.length).toLowerCase()
+		const suffix = utils.getFileType(fileName)
+		console.log('suffix', suffix)
 		// false才能传 禁止上传exe
 		const isExe = suffix === 'exe'
 		// true能传

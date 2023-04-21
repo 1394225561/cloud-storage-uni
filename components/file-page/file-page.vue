@@ -16,8 +16,15 @@
 			<!-- 导航栏操作popup -->
 			<uni-popup ref="popup" background-color="#fff" @change="popupChange">
 				<operate-popup :page-type="pageType" :permission-type="permissionType" :option="option"
-					:file-id="listParam.fileId">
+					:file-id="listParam.fileId" @closeTopPopup='closeTopPopup' @createDir='createDir'
+					@createTxt='createTxt'>
 				</operate-popup>
+			</uni-popup>
+			<!-- 新建文档 popup -->
+			<uni-popup ref="create-txt-popup" type="bottom" class="create-txt-popup">
+				<create-txt :page-type="pageType" :file-id="listParam.fileId" :txt-name-saved='txtNameSaved'
+					:txt-content-saved='txtContentSaved' @createTxtCancel='createTxtCancel' @saveTxtName='saveTxtName'
+					@saveTxtContent='saveTxtContent'></create-txt>
 			</uni-popup>
 		</view>
 		<!-- 列表 -->
@@ -41,8 +48,7 @@
 					{{ isSelectedAll ? '取消全选' : '全选' }}
 				</view>
 				<view class="select-popup__cancel" @click="clickRightText">
-					<icon-font class="select-popup__cancel__icon" icon="close-circle-o"
-						:is-colourful="false"></icon-font>
+					<icon-font class="select-popup__cancel__icon" icon="close-circle" :is-colourful="false"></icon-font>
 				</view>
 				<text class="select-popup__text">
 					{{ `已选择 ${currentRelated.data.selectedDatas.length} 个文件` }}
@@ -53,15 +59,15 @@
 				<operate-bar :page-type="pageType" :file-id="listParam.fileId" :is-single="false"></operate-bar>
 			</view>
 		</uni-transition>
+		<!-- 音视频预览 -->
+		<media-preview :page-type="pageType"></media-preview>
 	</view>
 </template>
 
 <script>
 	import {
 		getPersonalFile,
-		getShareFile
-	} from '@/common/apis/file/file.js'
-	import {
+		getShareFile,
 		fileUpload
 	} from '@/common/apis/file/file.js'
 	import {
@@ -116,7 +122,9 @@
 				},
 				listData: [],
 				isLast: true,
-				permissionType: -1
+				permissionType: -1,
+				txtNameSaved: '',
+				txtContentSaved: ''
 			}
 		},
 		computed: {
@@ -229,11 +237,13 @@
 			uni.$on(`${this.pageType}refreshList`, this.refreshList) // 下拉刷新
 			uni.$on(`${this.pageType}loadMore`, this.loadMore) // 上拉加载更多
 			uni.$on(`${this.pageType}updateFiles`, this.updateFiles) // 文件目录层级变化更新文件列表
+			uni.$on(`${this.pageType}createDirCancel`, this.createDirCancel)
 		},
 		beforeDestroy() {
 			uni.$off(`${this.pageType}refreshList`)
 			uni.$off(`${this.pageType}loadMore`)
 			uni.$off(`${this.pageType}updateFiles`)
+			uni.$off(`${this.pageType}createDirCancel`)
 		},
 		methods: {
 			clickLeft() {
@@ -251,6 +261,40 @@
 				}
 				this.$refs.popup.open('top')
 				this.closeOperatePopup()
+				this.createTxtCancel()
+			},
+			closeTopPopup() {
+				this.$refs.popup.close()
+			},
+			createDir() {
+				const file = {
+					id: Math.random().toString(36).substr(2),
+					fileName: '新建文件夹',
+					createDir: true,
+					isDir: 1,
+					parentFileName: this.listParam.fileName,
+					pid: this.listParam.fileId
+				}
+				console.log('createDir file', file)
+				this.listData.unshift(file)
+			},
+			createDirCancel(file) {
+				let index = this.listData.findIndex((item) => {
+					return item.id && (item.id === file.id)
+				})
+				this.listData.splice(index, 1)
+			},
+			createTxt() {
+				this.$refs['create-txt-popup'].open()
+			},
+			createTxtCancel() {
+				this.$refs['create-txt-popup'].close()
+			},
+			saveTxtName(value) {
+				this.txtNameSaved = value
+			},
+			saveTxtContent(value) {
+				this.txtContentSaved = value
 			},
 			closeOperatePopup() {
 				// 关闭operate-bar中底部的更多操作popup
@@ -266,6 +310,7 @@
 				if (!this.isSelecting) {
 					// 打开文件选择时 确保顶部操作popup为关闭状态
 					this.$refs.popup.close()
+					this.createTxtCancel()
 				}
 				this.isSelecting = !this.isSelecting
 			},
@@ -305,7 +350,7 @@
 						api: targetApi,
 						params: this.listParam
 					}).then((res) => {
-						// console.log('getListData ' + this.pageType + ' =======>', res)
+						console.log('getListData ' + this.pageType + ' =======>', res)
 						let data = res.data
 						if (!isLoadMore) {
 							this.listData = data.content
@@ -399,6 +444,12 @@
 			}
 		}
 
+		.popup-container {
+			::v-deep .uni-popup__wrapper.top {
+				z-index: -99;
+			}
+		}
+
 		.transition {
 			width: 100%;
 			background-color: #fafafa;
@@ -486,6 +537,10 @@
 				width: 100%;
 				height: 50px;
 			}
+		}
+
+		.create-txt-popup {
+			width: 100%;
 		}
 	}
 </style>

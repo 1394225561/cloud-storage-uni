@@ -88,6 +88,17 @@
 					}
 				}
 			}
+		},
+		{
+			"path": "pages/preview/preview",
+			"style": {
+				"app-plus": {
+					"titleNView": {
+						"backgroundColor": "#44474d",
+						"titleText": "文件预览"
+					}
+				}
+			}
 		}
 	],
 	"tabBar": {
